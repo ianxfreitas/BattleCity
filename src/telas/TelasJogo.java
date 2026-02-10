@@ -13,7 +13,7 @@ public class TelasJogo extends JFrame {
     private String dificuldade;
 
     public TelasJogo() {
-        setTitle("Battle City");
+        setTitle("Battle City - Tanque");
         setSize(520, 550);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
