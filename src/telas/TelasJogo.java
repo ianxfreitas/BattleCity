@@ -14,7 +14,7 @@ public class TelasJogo extends JFrame {
 
     public TelasJogo() {
         setTitle("Battle City");
-        setSize(500, 400);
+        setSize(520, 550);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
