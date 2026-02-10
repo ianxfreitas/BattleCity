@@ -8,7 +8,7 @@ public class TelasJogo extends JFrame {
     private CardLayout layout;
     private JPanel container;
 
-    // dados do jogador
+    // dados do jogador.
     private String nomeJogador;
     private String dificuldade;
 
