@@ -2,33 +2,22 @@ package mundo;
 
 import java.awt.*;
 
-public class Mapa {
+public abstract class Mapa {
 
-    // tamanho do mapa em tiles
+
     public static final int LINHAS = 13;
     public static final int COLUNAS = 13;
 
-    // tamanho de cada bloco em pixels
+
     public static final int TAMANHO = 40;
 
-    // matriz 13x13 (exemplo)
-    private int[][] mapa = {
-            {1,1,1,1,1,1,1,1,1,1,1,1,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,2,0,0,0,3,0,0,0,2,0,1},
-            {1,0,0,0,1,1,1,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,3,0,0,0,1},
-            {1,0,3,0,0,1,0,0,0,0,3,0,1},
-            {1,0,0,0,0,0,0,1,0,0,0,0,1},
-            {1,0,0,3,0,0,0,0,0,3,0,0,1},
-            {1,0,0,0,0,1,0,0,0,0,0,0,1},
-            {1,0,3,0,0,0,0,3,0,0,3,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,3,0,0,0,3,0,0,0,1},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1}
-    };
+
+    public abstract int[][] getMatriz();
+
 
     public void desenhar(Graphics g) {
+        int[][] mapa = getMatriz();
+
         for (int linha = 0; linha < LINHAS; linha++) {
             for (int coluna = 0; coluna < COLUNAS; coluna++) {
                 int x = coluna * TAMANHO;

@@ -1,7 +1,6 @@
 package telas;
 
-import mundo.Mapa;
-
+import mundo.*;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,9 +10,14 @@ public class PainelJogo extends JPanel {
 
     public PainelJogo() {
         setBackground(Color.BLACK);
-        mapa = new Mapa();
 
-        // garante foco futuramente
+        mapa = new Mapa1();
+
+        setPreferredSize(new Dimension(
+                Mapa.COLUNAS * Mapa.TAMANHO,
+                Mapa.LINHAS * Mapa.TAMANHO
+        ));
+
         setFocusable(true);
         setRequestFocusEnabled(true);
     }
@@ -22,13 +26,11 @@ public class PainelJogo extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // desenha o mapa 13x13
+
         mapa.desenhar(g);
 
-        // tanque provisório (continua simples)
+
         g.setColor(Color.GREEN);
         g.fillRect(100, 100, 40, 40);
-
-
     }
 }
