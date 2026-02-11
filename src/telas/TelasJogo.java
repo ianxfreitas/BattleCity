@@ -2,13 +2,13 @@ package telas;
 
 import javax.swing.*;
 import java.awt.*;
+import mundo.*;
 
 public class TelasJogo extends JFrame {
 
     private CardLayout layout;
     private JPanel container;
 
-    // --- DADOS DO JOGO ---
     private String nomeJogador;
     private String dificuldade;
     private String mapaSelecionado = "Aleatório"; // Novo: guarda o mapa escolhido
@@ -30,14 +30,9 @@ public class TelasJogo extends JFrame {
         container.add(menuInicial(), "MENU");
         container.add(telaConfiguracao(), "CONFIG");
         container.add(telaRanking(), "RANKING");
-        container.add(new PainelJogo(), "JOGO"); // Mantive comentado caso você ainda não tenha a classe PainelJogo pronta
 
-        // --- TELA DE JOGO PROVISÓRIA (apenas para teste, se não tiver o PainelJogo) ---
-        JPanel jogoTeste = new JPanel();
-        jogoTeste.setBackground(Color.BLACK);
-        jogoTeste.add(new JLabel("JOGO INICIADO", JLabel.CENTER));
-        container.add(jogoTeste, "JOGO");
-        // --------------------------------------------------------------------------
+        // Não adicionamos o painel de jogo aqui — ele será criado quando o jogador confirmar
+        // para garantir que o mapa selecionado seja usado.
 
         add(container);
         layout.show(container, "MENU");
@@ -159,10 +154,41 @@ public class TelasJogo extends JFrame {
                             "\nDificuldade: " + dificuldade +
                             "\nMapa Escolhido: " + mapaFinal + " (" + mapaSelecionado + ")");
 
+            // Cria o mapa escolhido
+            Mapa mapaObj;
+            switch (mapaFinal) {
+                case "Mapa 1":
+                    mapaObj = new mundo.Mapa1();
+                    break;
+                case "Mapa 2":
+                    mapaObj = new mundo.Mapa2();
+                    break;
+                        case "Mapa 3":
+                            mapaObj = new mundo.Mapa3();
+                            break;
+                default:
+                    // Caso inesperado, usa Mapa1
+                    mapaObj = new mundo.Mapa1();
+                    break;
+            }
+
+            // Remove qualquer PainelJogo anterior adicionado ao container para evitar acúmulo
+            for (Component c : container.getComponents()) {
+                if (c instanceof PainelJogo) {
+                    container.remove(c);
+                    break;
+                }
+            }
+
+            // Cria o painel do jogo com o mapa selecionado e adiciona ao container
+            PainelJogo painelJogo = new PainelJogo(mapaObj);
+            container.add(painelJogo, "JOGO");
+            container.revalidate();
+            container.repaint();
             layout.show(container, "JOGO");
 
-            // Tenta focar no jogo (se o painel permitir)
-            container.getComponent(3).requestFocus();
+            // Tenta focar no painel recém-criado
+            painelJogo.requestFocusInWindow();
         });
 
         voltar.addActionListener(e -> layout.show(container, "MENU"));
