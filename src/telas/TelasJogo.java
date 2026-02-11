@@ -11,14 +11,13 @@ public class TelasJogo extends JFrame {
 
     private String nomeJogador;
     private String dificuldade;
-    private String mapaSelecionado = "Aleatório"; // Novo: guarda o mapa escolhido
+    private String mapaSelecionado = "Aleatório";
 
-    // Variáveis dos botões de mapa (para podermos mudar a cor deles depois)
     private JButton btnMapAleatorio, btnMap1, btnMap2, btnMap3;
 
     public TelasJogo() {
         setTitle("Battle City - Configuração");
-        setSize(520, 550); // Aumentei um pouquinho a altura
+        setSize(530, 550); // Aumentei um pouquinho a altura
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -31,8 +30,7 @@ public class TelasJogo extends JFrame {
         container.add(telaConfiguracao(), "CONFIG");
         container.add(telaRanking(), "RANKING");
 
-        // Não adicionamos o painel de jogo aqui — ele será criado quando o jogador confirmar
-        // para garantir que o mapa selecionado seja usado.
+        // O painel de jogo será criado dinamicamente após o jogador confirmar as configurações
 
         add(container);
         layout.show(container, "MENU");
@@ -40,9 +38,8 @@ public class TelasJogo extends JFrame {
         setVisible(true);
     }
 
-    /* =======================
-       1) MENU INICIAL
-       ======================= */
+    // 1) MENU INICIAL
+
     private JPanel menuInicial() {
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(50, 120, 50, 120));
@@ -66,19 +63,17 @@ public class TelasJogo extends JFrame {
         return panel;
     }
 
-    /* =======================
-       2) TELA CONFIGURAÇÃO (MODIFICADA)
-       ======================= */
+    // 2) TELA CONFIGURAÇÃO
+
     private JPanel telaConfiguracao() {
-        // Layout principal: 9 linhas para caber tudo organizado
         JPanel panel = new JPanel(new GridLayout(9, 1, 5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
 
-        // --- NOME ---
+        // NOME
         JLabel lblNome = new JLabel("Nome do Jogador:");
         JTextField campoNome = new JTextField();
 
-        // --- DIFICULDADE (Agrupada em um painel horizontal) ---
+        // DIFICULDADE
         JLabel lblDificuldade = new JLabel("Dificuldade:");
         JPanel panelDificuldade = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
@@ -94,7 +89,7 @@ public class TelasJogo extends JFrame {
         panelDificuldade.add(medio);
         panelDificuldade.add(dificil);
 
-        // --- SELEÇÃO DE MAPA (NOVO) ---
+        // SELEÇÃO DE MAPA
         JLabel lblMapa = new JLabel("Selecione o Mapa:");
 
         // Painel para os 4 botões ficarem lado a lado
@@ -125,7 +120,7 @@ public class TelasJogo extends JFrame {
         // Define o padrão inicial visualmente
         selecionarBotaoMapa("Aleatório", btnMapAleatorio);
 
-        // --- BOTÕES DE AÇÃO ---
+        // BOTÕES DE AÇÃO
         JButton confirmar = new JButton("CONFIRMAR E JOGAR");
         confirmar.setBackground(new Color(50, 205, 50)); // Verde
         confirmar.setForeground(Color.WHITE);
@@ -154,25 +149,23 @@ public class TelasJogo extends JFrame {
                             "\nDificuldade: " + dificuldade +
                             "\nMapa Escolhido: " + mapaFinal + " (" + mapaSelecionado + ")");
 
-            // Cria o mapa escolhido
+            // Cria o objeto Mapa correspondente
             Mapa mapaObj;
             switch (mapaFinal) {
                 case "Mapa 1":
-                    mapaObj = new mundo.Mapa1();
+                    mapaObj = new Mapa1();
                     break;
                 case "Mapa 2":
-                    mapaObj = new mundo.Mapa2();
+                    mapaObj = new Mapa2();
                     break;
-                        case "Mapa 3":
-                            mapaObj = new mundo.Mapa3();
-                            break;
+                case "Mapa 3":
+                    mapaObj = new Mapa3();
+                    break;
                 default:
-                    // Caso inesperado, usa Mapa1
-                    mapaObj = new mundo.Mapa1();
-                    break;
+                    mapaObj = new Mapa1();
             }
 
-            // Remove qualquer PainelJogo anterior adicionado ao container para evitar acúmulo
+            // Remove qualquer PainelJogo anteriormente adicionado
             for (Component c : container.getComponents()) {
                 if (c instanceof PainelJogo) {
                     container.remove(c);
@@ -180,14 +173,13 @@ public class TelasJogo extends JFrame {
                 }
             }
 
-            // Cria o painel do jogo com o mapa selecionado e adiciona ao container
+            // Cria e adiciona o painel do jogo com o mapa selecionado
             PainelJogo painelJogo = new PainelJogo(mapaObj);
             container.add(painelJogo, "JOGO");
             container.revalidate();
             container.repaint();
             layout.show(container, "JOGO");
 
-            // Tenta focar no painel recém-criado
             painelJogo.requestFocusInWindow();
         });
 
