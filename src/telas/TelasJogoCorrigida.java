@@ -1,6 +1,8 @@
 package telas;
 
 import jogo.*;
+import mundo.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
  * Janela principal do jogo Battle City.
  * Gerencia as diferentes telas: menu, configuração, ranking e jogo.
  */
-public class TelasJogo extends JFrame {
+public class TelasJogoCorrigida extends JFrame {
 
 	private CardLayout layout;
 	private JPanel container;
@@ -24,9 +26,9 @@ public class TelasJogo extends JFrame {
 
 	private JButton btnMapAleatorio, btnMap1, btnMap2, btnMap3;
 
-	public TelasJogo() {
+	public TelasJogoCorrigida() {
 		setTitle("Battle City");
-		setSize(820, 870);
+		setSize(600, 700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -36,7 +38,6 @@ public class TelasJogo extends JFrame {
 
 		layout = new CardLayout();
 		container = new JPanel(layout);
-		container.setBackground(new Color(20, 20, 20));
 
 		container.add(criarMenuInicial(), "MENU");
 		container.add(criarTelaConfiguracao(), "CONFIG");
@@ -50,7 +51,7 @@ public class TelasJogo extends JFrame {
 	private JPanel criarMenuInicial() {
 		JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
 		panel.setBackground(new Color(30, 30, 30));
-		panel.setBorder(BorderFactory.createEmptyBorder(60, 60, 60, 60));
+		panel.setBorder(BorderFactory.createEmptyBorder(80, 80, 80, 80));
 
 		JLabel titulo = new JLabel("BATTLE CITY");
 		titulo.setFont(new Font("Arial", Font.BOLD, 48));
@@ -81,7 +82,7 @@ public class TelasJogo extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.setBackground(new Color(40, 40, 40));
-		panel.setBorder(BorderFactory.createEmptyBorder(15, 50, 15, 50));
+		panel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
 
 		JLabel titulo = new JLabel("CONFIGURAÇÃO");
 		titulo.setFont(new Font("Arial", Font.BOLD, 24));
@@ -287,10 +288,7 @@ public class TelasJogo extends JFrame {
 			}
 		}
 
-		PainelJogoV2 painelJogo = new PainelJogoV2(config, () -> {
-			// Callback quando game over é detectado
-			exibirTelaGameOver();
-		});
+		PainelJogoV2 painelJogo = new PainelJogoV2(config);
 		container.add(painelJogo, "JOGO");
 		container.revalidate();
 		container.repaint();
@@ -298,34 +296,7 @@ public class TelasJogo extends JFrame {
 		painelJogo.requestFocusInWindow();
 	}
 
-	private void exibirTelaGameOver() {
-		for (Component c : container.getComponents()) {
-			if (c instanceof TelaGameOver) {
-				container.remove(c);
-			}
-		}
-
-		TelaGameOver telaGameOver = new TelaGameOver(config, ranking, new TelaGameOver.GameOverListener() {
-			@Override
-			public void onVoltarAoLobby() {
-				// Voltar ao menu inicial
-				layout.show(container, "MENU");
-			}
-
-			@Override
-			public void onJogarNovamente() {
-				// Voltar para seleção de configurações
-				layout.show(container, "CONFIG");
-			}
-		});
-
-		container.add(telaGameOver, "GAMEOVER");
-		container.revalidate();
-		container.repaint();
-		layout.show(container, "GAMEOVER");
-	}
-
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(TelasJogo::new);
+		SwingUtilities.invokeLater(TelasJogoCorrigida::new);
 	}
 }

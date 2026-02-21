@@ -1,15 +1,17 @@
 package telas;
 
 import jogo.*;
+import mundo.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 /**
- * Janela principal do jogo Battle City.
- * Gerencia as diferentes telas: menu, configuração, ranking e jogo.
+ * DEPRECATED - Use TelasJogo.java ao invés.
+ * Versão alternativa do TelasJogo.
  */
-public class TelasJogo extends JFrame {
+class TelasJogoNova extends JFrame {
 
 	private CardLayout layout;
 	private JPanel container;
@@ -24,9 +26,9 @@ public class TelasJogo extends JFrame {
 
 	private JButton btnMapAleatorio, btnMap1, btnMap2, btnMap3;
 
-	public TelasJogo() {
+	public TelasJogoNova() {
 		setTitle("Battle City");
-		setSize(820, 870);
+		setSize(600, 700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -36,30 +38,31 @@ public class TelasJogo extends JFrame {
 
 		layout = new CardLayout();
 		container = new JPanel(layout);
-		container.setBackground(new Color(20, 20, 20));
 
+		// Adicionar telas
 		container.add(criarMenuInicial(), "MENU");
 		container.add(criarTelaConfiguracao(), "CONFIG");
 		container.add(criarTelaRanking(), "RANKING");
 
 		add(container);
 		layout.show(container, "MENU");
+
 		setVisible(true);
 	}
 
+	// ==================== MENU INICIAL ====================
 	private JPanel criarMenuInicial() {
 		JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
 		panel.setBackground(new Color(30, 30, 30));
-		panel.setBorder(BorderFactory.createEmptyBorder(60, 60, 60, 60));
+		panel.setBorder(BorderFactory.createEmptyBorder(80, 120, 80, 120));
 
-		JLabel titulo = new JLabel("BATTLE CITY");
+		JLabel titulo = new JLabel("BATTLE CITY", SwingConstants.CENTER);
 		titulo.setFont(new Font("Arial", Font.BOLD, 48));
 		titulo.setForeground(new Color(100, 200, 100));
-		titulo.setHorizontalAlignment(SwingConstants.CENTER);
 
-		JButton btnJogar = new JButton("Jogar");
-		JButton btnRanking = new JButton("Ranking");
-		JButton btnSair = new JButton("Sair");
+		JButton btnJogar = new JButton("▶ Jogar");
+		JButton btnRanking = new JButton("🏆 Ranking");
+		JButton btnSair = new JButton("✕ Sair");
 
 		estilizarBotao(btnJogar);
 		estilizarBotao(btnRanking);
@@ -77,21 +80,24 @@ public class TelasJogo extends JFrame {
 		return panel;
 	}
 
+	// ==================== TELA CONFIGURAÇÃO ====================
 	private JPanel criarTelaConfiguracao() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.setBackground(new Color(40, 40, 40));
-		panel.setBorder(BorderFactory.createEmptyBorder(15, 50, 15, 50));
+		panel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
 
-		JLabel titulo = new JLabel("CONFIGURAÇÃO");
+		// TÍTULO
+		JLabel titulo = new JLabel("CONFIGURAÇÃO DO JOGO");
 		titulo.setFont(new Font("Arial", Font.BOLD, 24));
 		titulo.setForeground(Color.WHITE);
 		titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		// NOME
-		JLabel lblNome = new JLabel("Nome:");
+		JLabel lblNome = new JLabel("Nome do Jogador:");
 		lblNome.setForeground(Color.WHITE);
-		JTextField campoNome = new JTextField("Jogador", 15);
+		JTextField campoNome = new JTextField(15);
+		campoNome.setText("Jogador");
 
 		JPanel panelNome = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		panelNome.setBackground(new Color(40, 40, 40));
@@ -124,7 +130,7 @@ public class TelasJogo extends JFrame {
 		panelDificuldade.add(rbDificil);
 
 		// VIDAS
-		JLabel lblVidas = new JLabel("Vidas:");
+		JLabel lblVidas = new JLabel("Vidas Iniciais:");
 		lblVidas.setForeground(Color.WHITE);
 		JSpinner spinVidas = new JSpinner(new SpinnerNumberModel(3, 1, 9, 1));
 
@@ -133,8 +139,18 @@ public class TelasJogo extends JFrame {
 		panelVidas.add(lblVidas);
 		panelVidas.add(spinVidas);
 
-		// MAPA
-		JLabel lblMapa = new JLabel("Mapa:");
+		// TIPO DE TANQUE
+		JLabel lblTanque = new JLabel("Tipo de Tanque:");
+		lblTanque.setForeground(Color.WHITE);
+		JComboBox<String> comboTanque = new JComboBox<>(new String[]{"Ágil", "Balanceado", "Blindado"});
+
+		JPanel panelTanque = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		panelTanque.setBackground(new Color(40, 40, 40));
+		panelTanque.add(lblTanque);
+		panelTanque.add(comboTanque);
+
+		// SELEÇÃO DE MAPA
+		JLabel lblMapa = new JLabel("Selecione o Mapa:", SwingConstants.CENTER);
 		lblMapa.setForeground(Color.WHITE);
 
 		btnMapAleatorio = new JButton("?");
@@ -144,6 +160,7 @@ public class TelasJogo extends JFrame {
 
 		for (JButton btn : new JButton[]{btnMapAleatorio, btnMap1, btnMap2, btnMap3}) {
 			btn.setPreferredSize(new Dimension(50, 50));
+			btn.setFont(new Font("Arial", Font.BOLD, 16));
 		}
 
 		btnMapAleatorio.addActionListener(e -> selecionarMapa("Aleatório", btnMapAleatorio));
@@ -153,18 +170,21 @@ public class TelasJogo extends JFrame {
 
 		selecionarMapa("Aleatório", btnMapAleatorio);
 
-		JPanel panelMapas = new JPanel(new GridLayout(1, 4, 5, 0));
+		JPanel panelMapas = new JPanel(new GridLayout(1, 4, 10, 0));
 		panelMapas.setBackground(new Color(40, 40, 40));
 		panelMapas.add(btnMapAleatorio);
 		panelMapas.add(btnMap1);
 		panelMapas.add(btnMap2);
 		panelMapas.add(btnMap3);
 
-		// BOTÕES
+		// BOTÕES DE AÇÃO
+		JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+		panelBotoes.setBackground(new Color(40, 40, 40));
+
 		JButton btnConfirmar = new JButton("JOGAR");
 		btnConfirmar.setBackground(new Color(34, 139, 34));
 		btnConfirmar.setForeground(Color.WHITE);
-		btnConfirmar.setFont(new Font("Arial", Font.BOLD, 14));
+		btnConfirmar.setFont(new Font("Arial", Font.BOLD, 16));
 
 		JButton btnVoltar = new JButton("Voltar");
 		estilizarBotao(btnVoltar);
@@ -178,23 +198,26 @@ public class TelasJogo extends JFrame {
 			nomeJogador = campoNome.getText().trim();
 			dificuldade = rbFacil.isSelected() ? "Fácil" : rbDificil.isSelected() ? "Difícil" : "Médio";
 			vidas = (int) spinVidas.getValue();
+			tipoTanque = (String) comboTanque.getSelectedItem();
 
+			// Configurar objeto config
 			config.setNomeJogador(nomeJogador);
 			config.setDificuldade(dificuldade);
+			config.setTipoTanque(tipoTanque);
 			config.setVidas(vidas);
 			config.setMapaSelecionado(mapaSelecionado);
 			config.setJogoEmAndamento(true);
 
+			// Iniciar jogo
 			iniciarJogo();
 		});
 
 		btnVoltar.addActionListener(e -> layout.show(container, "MENU"));
 
-		JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-		panelBotoes.setBackground(new Color(40, 40, 40));
 		panelBotoes.add(btnConfirmar);
 		panelBotoes.add(btnVoltar);
 
+		// ASSEMBLAGEM FINAL
 		panel.add(Box.createVerticalStrut(20));
 		panel.add(titulo);
 		panel.add(Box.createVerticalStrut(20));
@@ -203,10 +226,12 @@ public class TelasJogo extends JFrame {
 		panel.add(panelDificuldade);
 		panel.add(Box.createVerticalStrut(10));
 		panel.add(panelVidas);
+		panel.add(Box.createVerticalStrut(10));
+		panel.add(panelTanque);
 		panel.add(Box.createVerticalStrut(20));
 		panel.add(lblMapa);
 		panel.add(panelMapas);
-		panel.add(Box.createVerticalStrut(20));
+		panel.add(Box.createVerticalStrut(30));
 		panel.add(panelBotoes);
 		panel.add(Box.createVerticalGlue());
 
@@ -223,33 +248,34 @@ public class TelasJogo extends JFrame {
 		botao.setForeground(Color.WHITE);
 	}
 
+	// ==================== TELA RANKING ====================
 	private JPanel criarTelaRanking() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBackground(new Color(40, 40, 40));
 
-		JLabel titulo = new JLabel("TOP 10 RANKING");
+		JLabel titulo = new JLabel("TOP 10 RANKING", SwingConstants.CENTER);
 		titulo.setFont(new Font("Arial", Font.BOLD, 28));
 		titulo.setForeground(new Color(255, 215, 0));
-		titulo.setHorizontalAlignment(SwingConstants.CENTER);
 		titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
 		JTextArea areaRanking = new JTextArea();
 		areaRanking.setEditable(false);
 		areaRanking.setBackground(new Color(50, 50, 50));
 		areaRanking.setForeground(Color.WHITE);
-		areaRanking.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		areaRanking.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		areaRanking.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+		// Carregar ranking
 		StringBuilder sb = new StringBuilder();
-		sb.append("POS | JOGADOR          | PONTOS | FASE\n");
-		sb.append("=====================================\n");
+		sb.append("POSIÇÃO | JOGADOR          | PONTOS | FASE\n");
+		sb.append("=========================================\n");
 		List<Ranking.Jogador> jogadores = ranking.getJogadores();
 		if (jogadores.isEmpty()) {
-			sb.append(" -  | Ninguém          |  0    |  -  \n");
+			sb.append("  -    |   Nenhum          | 0    |  -\n");
 		} else {
 			for (int i = 0; i < jogadores.size(); i++) {
 				Ranking.Jogador j = jogadores.get(i);
-				sb.append(String.format("%3d | %-16s | %5d | %3d\n", i + 1, j.nome, j.pontuacao, j.fase));
+				sb.append(String.format("%3d    | %-16s | %5d | %3d\n", i + 1, j.nome, j.pontuacao, j.fase));
 			}
 		}
 
@@ -273,6 +299,7 @@ public class TelasJogo extends JFrame {
 		return panel;
 	}
 
+	// ==================== MÉTODOS AUXILIARES ====================
 	private void estilizarBotao(JButton btn) {
 		btn.setBackground(new Color(70, 130, 180));
 		btn.setForeground(Color.WHITE);
@@ -281,16 +308,15 @@ public class TelasJogo extends JFrame {
 	}
 
 	private void iniciarJogo() {
+		// Remover painel de jogo anterior se existir
 		for (Component c : container.getComponents()) {
 			if (c instanceof PainelJogoV2) {
 				container.remove(c);
 			}
 		}
 
-		PainelJogoV2 painelJogo = new PainelJogoV2(config, () -> {
-			// Callback quando game over é detectado
-			exibirTelaGameOver();
-		});
+		// Criar novo painel de jogo
+		PainelJogoV2 painelJogo = new PainelJogoV2(config);
 		container.add(painelJogo, "JOGO");
 		container.revalidate();
 		container.repaint();
@@ -298,34 +324,7 @@ public class TelasJogo extends JFrame {
 		painelJogo.requestFocusInWindow();
 	}
 
-	private void exibirTelaGameOver() {
-		for (Component c : container.getComponents()) {
-			if (c instanceof TelaGameOver) {
-				container.remove(c);
-			}
-		}
-
-		TelaGameOver telaGameOver = new TelaGameOver(config, ranking, new TelaGameOver.GameOverListener() {
-			@Override
-			public void onVoltarAoLobby() {
-				// Voltar ao menu inicial
-				layout.show(container, "MENU");
-			}
-
-			@Override
-			public void onJogarNovamente() {
-				// Voltar para seleção de configurações
-				layout.show(container, "CONFIG");
-			}
-		});
-
-		container.add(telaGameOver, "GAMEOVER");
-		container.revalidate();
-		container.repaint();
-		layout.show(container, "GAMEOVER");
-	}
-
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(TelasJogo::new);
+		SwingUtilities.invokeLater(TelasJogoNova::new);
 	}
 }

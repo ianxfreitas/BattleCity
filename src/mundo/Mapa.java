@@ -4,12 +4,9 @@ import java.awt.*;
 
 public abstract class Mapa {
 
-
-    public static final int LINHAS = 13;
-    public static final int COLUNAS = 13;
-
-
-    public static final int TAMANHO = 40;
+	public static final int LINHAS = 13;
+	public static final int COLUNAS = 13;
+	public static final int TAMANHO = 60;
 
 
     public abstract int[][] getMatriz();
