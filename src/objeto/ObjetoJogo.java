@@ -28,9 +28,6 @@ public abstract class ObjetoJogo implements Colidivel, Temporizado {
 	// Desenha o objeto na tela
 	public abstract void desenhar(Graphics g);
 
-	/**
-	 * Implementação padrão de colisão baseada em AABB (Axis-Aligned Bounding Box).
-	 */
 	@Override
 	public boolean colideCom(Colidivel outro) {
 		return getBounds().intersects(outro.getBounds());

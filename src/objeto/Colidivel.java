@@ -5,15 +5,11 @@ package objeto;
  */
 public interface Colidivel {
 	/**
-	 * Verifica se este objeto colide com outro.
-	 * @param outro o outro objeto a verificar colisão
-	 * @return true se há colisão, false caso contrário
+	 * Verifica se este objeto colide com outro objeto colidível.
+	 * @param outro o outro objeto para verificar a colisão
+	 * @return true se colidir, false caso contrário
 	 */
 	boolean colideCom(Colidivel outro);
 
-	/**
-	 * Obtém os limites (bounding box) do objeto.
-	 * @return um Rectangle representando os limites
-	 */
 	java.awt.Rectangle getBounds();
 }

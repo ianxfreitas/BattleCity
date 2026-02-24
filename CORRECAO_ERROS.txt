@@ -1,0 +1,34 @@
+CORREÇÃO DE ERROS - CARDLAYOUT FIX
+==================================
+
+ERROS ENCONTRADOS E CORRIGIDOS:
+
+1. ❌ setFocusable(true) DUPLICADO em PainelMenuRetro
+   Linha 111: setFocusable(true);
+   Linha 121: setFocusable(true); ← REMOVIDO
+
+2. ❌ setFocusable(true) DUPLICADO em PainelMenuAcao
+   Linha 433: setFocusable(true);
+   Linha 450: setFocusable(true); ← REMOVIDO
+
+3. ❌ Comentários redundantes removidos
+   Removido: "--- A MÁGICA DO FOCO ESTÁ AQUI ---"
+   Removido: "IMPORTANTE: Usar WHEN_FOCUSED..."
+   Mantido: Apenas essencial
+
+ARQUIVO CORRIGIDO:
+  src/telas/TelasJogo.java
+
+MUDANÇAS:
+  - Removida duplicação de setFocusable(true)
+  - Mantida apenas uma chamada por classe
+  - Mantido o InputMap com WHEN_FOCUSED (correto!)
+  - Mantido o ComponentListener para foco
+  - Mantido o addComponentListener
+
+STATUS: ✅ ERROS CORRIGIDOS
+
+PRÓXIMO PASSO:
+  Execute: testar_compilacao_final.bat
+
+Se compilar OK, o código está pronto para uso!

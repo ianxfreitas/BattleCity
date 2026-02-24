@@ -1,6 +1,9 @@
 package objeto;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
 
 /**
  * Representa um power-up que o jogador pode coletar.
@@ -26,8 +29,16 @@ public class PowerUp extends ObjetoJogo {
 	}
 
 	private TipoPowerUp tipo;
-	private int duracao; // em ticks (16ms cada), -1 para permanente
+	private int duracao;
 	private boolean ativo;
+
+	// Variáveis para TODAS as imagens
+	private BufferedImage imgEstrela;
+	private BufferedImage imgCapacete;
+	private BufferedImage imgPa;
+	private BufferedImage imgRelogio;
+	private BufferedImage imgBomba;
+	private BufferedImage imgVida;
 
 	public PowerUp(int x, int y, int tamanho, TipoPowerUp tipo) {
 		super(x, y, tamanho, tamanho);
@@ -36,11 +47,37 @@ public class PowerUp extends ObjetoJogo {
 
 		// Definir duração baseado no tipo
 		switch (tipo) {
-			case CAPACETE, RELOGIO -> this.duracao = 300; // ~5 segundos
-			default -> this.duracao = -1; // permanente
+			case CAPACETE, RELOGIO -> this.duracao = 300;
+			default -> this.duracao = -1;
 		}
+
+		carregarImagens();
 	}
 
+	// CARREGAMENTO DE IMAGENS
+	private void carregarImagens() {
+		imgEstrela = carregarUmaImagem("/res/estrela.png");
+		imgCapacete = carregarUmaImagem("/res/capacete.png");
+		imgPa = carregarUmaImagem("/res/pa.png");
+		imgRelogio = carregarUmaImagem("/res/relogio.png");
+		imgBomba = carregarUmaImagem("/res/bomba.png");
+		imgVida = carregarUmaImagem("/res/vida.png");
+	}
+
+	// Método ajudante para não precisar repetir try-catch várias vezes
+	private BufferedImage carregarUmaImagem(String caminho) {
+		try {
+			InputStream is = getClass().getResourceAsStream(caminho);
+			if (is != null) {
+				return ImageIO.read(is);
+			}
+		} catch (Exception e) {
+			// Se der erro, simplesmente retorna null e o jogo usa o fallback
+		}
+		return null;
+	}
+
+	// LÓGICA DO JOGO E DESENHO
 	@Override
 	public void atualizar() {
 		if (duracao > 0) {
@@ -55,6 +92,15 @@ public class PowerUp extends ObjetoJogo {
 	public void desenhar(Graphics g) {
 		if (!ativo) return;
 
+		// CHECAGEM DE IMAGENS: Se a imagem existir, desenha e encerra o método (return)
+		if (tipo == TipoPowerUp.ESTRELA && imgEstrela != null) { g.drawImage(imgEstrela, x, y, largura, altura, null); return; }
+		if (tipo == TipoPowerUp.CAPACETE && imgCapacete != null) { g.drawImage(imgCapacete, x, y, largura, altura, null); return; }
+		if (tipo == TipoPowerUp.PA && imgPa != null) { g.drawImage(imgPa, x, y, largura, altura, null); return; }
+		if (tipo == TipoPowerUp.RELOGIO && imgRelogio != null) { g.drawImage(imgRelogio, x, y, largura, altura, null); return; }
+		if (tipo == TipoPowerUp.BOMBA && imgBomba != null) { g.drawImage(imgBomba, x, y, largura, altura, null); return; }
+		if (tipo == TipoPowerUp.VIDA && imgVida != null) { g.drawImage(imgVida, x, y, largura, altura, null); return; }
+
+		// FALLBACK ORIGINAL: Usado caso as imagens não carreguem
 		Color cor = switch (tipo) {
 			case ESTRELA -> Color.YELLOW;
 			case CAPACETE -> Color.CYAN;
@@ -69,7 +115,7 @@ public class PowerUp extends ObjetoJogo {
 		g.setColor(Color.BLACK);
 		g.drawRect(x, y, largura, altura);
 
-		// Desenhar símbolo
+		// Desenhar símbolo original
 		switch (tipo) {
 			case ESTRELA:
 				g.setColor(Color.BLACK);

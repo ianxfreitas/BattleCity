@@ -56,7 +56,6 @@ public class Configuracoes {
 	public boolean isJogoEmAndamento() { return jogoEmAndamento; }
 	public void setJogoEmAndamento(boolean ativo) { this.jogoEmAndamento = ativo; }
 
-	// Método para resetar configurações para nova partida
 	public void resetarParaNovaPartida() {
 		this.vidas = 3;
 		this.pontuacao = 0;

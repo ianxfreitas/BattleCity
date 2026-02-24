@@ -7,7 +7,8 @@ import objeto.Tiro;
 
 /**
  * Gerencia os controles de teclado do jogador.
- * Permite movimento (setas/WASD) e tiro (espaço).
+ * (setas/WASD) e tiro (espaço).
+ * Modificado para travar o movimento em apenas 4 direções (sem diagonal).
  */
 public class ControleTeclado extends KeyAdapter {
 
@@ -24,21 +25,33 @@ public class ControleTeclado extends KeyAdapter {
 			case KeyEvent.VK_W:
 			case KeyEvent.VK_UP:
 				jogador.setMovCima(true);
+				jogador.setMovBaixo(false);
+				jogador.setMovEsquerda(false);
+				jogador.setMovDireita(false);
 				e.consume();
 				break;
 			case KeyEvent.VK_S:
 			case KeyEvent.VK_DOWN:
 				jogador.setMovBaixo(true);
+				jogador.setMovCima(false);
+				jogador.setMovEsquerda(false);
+				jogador.setMovDireita(false);
 				e.consume();
 				break;
 			case KeyEvent.VK_A:
 			case KeyEvent.VK_LEFT:
 				jogador.setMovEsquerda(true);
+				jogador.setMovDireita(false);
+				jogador.setMovCima(false);
+				jogador.setMovBaixo(false);
 				e.consume();
 				break;
 			case KeyEvent.VK_D:
 			case KeyEvent.VK_RIGHT:
 				jogador.setMovDireita(true);
+				jogador.setMovEsquerda(false);
+				jogador.setMovCima(false);
+				jogador.setMovBaixo(false);
 				e.consume();
 				break;
 			case KeyEvent.VK_SPACE:
@@ -53,6 +66,7 @@ public class ControleTeclado extends KeyAdapter {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		// Quando solta a tecla, apenas desliga a direção correspondente
 		switch (e.getKeyCode()) {
 			case KeyEvent.VK_W:
 			case KeyEvent.VK_UP:
@@ -81,9 +95,6 @@ public class ControleTeclado extends KeyAdapter {
 		this.listener = listener;
 	}
 
-	/**
-	 * Interface para callback quando o jogador atira.
-	 */
 	public interface OnAtiraListener {
 		void onAtira(Tiro tiro);
 	}

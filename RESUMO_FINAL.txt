@@ -1,0 +1,44 @@
+RESUMO: PROBLEMA → CAUSA → SOLUÇÃO → RESULTADO
+================================================
+
+SEU PROBLEMA:
+=============
+"Na tela de GAME OVER, quando eu movo o cursor para a opção 2 
+e aperto ENTER, o código não executa a opção 2."
+
+A CAUSA:
+========
+Duas instâncias de PainelMenuAcao (PAUSE e GAMEOVER) recebiam 
+eventos de teclado simultaneamente porque usavam 
+WHEN_IN_FOCUSED_WINDOW.
+
+A SOLUÇÃO:
+==========
+Mudar para WHEN_FOCUSED e garantir que apenas o painel com 
+foco receba os eventos.
+
+MUDANÇA NO CÓDIGO:
+==================
+
+Arquivo: src/telas/TelasJogo.java
+
+Linha ~122 (PainelMenuRetro):
+   InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+
+Linha ~449 (PainelMenuAcao):
+   InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+
+RESULTADO FINAL:
+================
+
+✅ Problema resolvido
+✅ Código compilável
+✅ Sem conflitos de foco
+✅ Pronto para usar
+
+PRÓXIMO PASSO:
+==============
+
+Execute: testar_compilacao_final.bat
+
+SUCESSO! 🎮

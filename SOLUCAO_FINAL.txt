@@ -1,0 +1,54 @@
+✅ SOLUÇÃO COMPLETA - CARDLAYOUT COM MÚLTIPLAS INSTÂNCIAS
+==========================================================
+
+SITUAÇÃO FINAL:
+================
+
+✅ Problema identificado: Conflito de foco no CardLayout
+✅ Causa encontrada: WHEN_IN_FOCUSED_WINDOW
+✅ Solução implementada: WHEN_FOCUSED
+✅ Código corrigido: sem duplicações
+✅ Pronto para compilação
+
+ERROS CORRIGIDOS:
+==================
+
+1. setFocusable(true) duplicado em PainelMenuRetro
+2. setFocusable(true) duplicado em PainelMenuAcao
+3. Comentários redundantes removidos
+
+MUDANÇA PRINCIPAL (A SOLUÇÃO):
+==============================
+
+   ANTES: getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+   DEPOIS: getInputMap(JComponent.WHEN_FOCUSED)
+
+   Resultado: ✅ Apenas o painel visível recebe eventos
+
+PRÓXIMO PASSO:
+==============
+
+1. Execute: testar_compilacao_final.bat
+2. Se compilar OK, execute: java -cp bin jogo.Main
+3. Teste a funcionalidade
+
+ARQUIVO PRINCIPAL:
+===================
+
+src/telas/TelasJogo.java
+  ├─ Classe PainelMenuRetro (Menu Principal)
+  │  └─ Usa WHEN_FOCUSED ✅
+  │
+  └─ Classe PainelMenuAcao (PAUSE e GAMEOVER)
+     └─ Usa WHEN_FOCUSED ✅
+
+RESULTADO ESPERADO:
+====================
+
+✓ PAUSE funciona corretamente
+✓ GAMEOVER funciona corretamente
+✓ Opção 2 em GAMEOVER executa
+✓ Sem interferência entre painéis
+
+DATA: 23 de fevereiro de 2026
+STATUS: ✅ PRONTO PARA TESTE

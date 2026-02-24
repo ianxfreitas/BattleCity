@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Gerencia o ranking de jogadores com persistência em arquivo.
+ * Gerencia o ranking de jogadores
  * Carrega e salva os 10 melhores scores em um arquivo de texto.
  */
 public class Ranking {
@@ -48,9 +48,6 @@ public class Ranking {
 		carregar();
 	}
 
-	/**
-	 * Carrega o ranking do arquivo, ou cria um novo se não existir.
-	 */
 	public void carregar() {
 		jogadores.clear();
 		File file = new File(ARQUIVO_RANKING);
@@ -107,22 +104,24 @@ public class Ranking {
 	/**
 	 * Adiciona um novo jogador ao ranking (se qualificar).
 	 */
-	public void adicionarJogador(String nome, int pontuacao, int fase) {
-		if (!qualificaParaRanking(pontuacao)) {
-			System.out.println("Pontuação não qualifica para o ranking.");
-			return;
+	public void adicionarJogador(String nome, int pontos, int fase) {
+		// Adiciona o jogador na lista, independente da pontuação
+		Jogador novoJogador = new Jogador(nome, pontos, fase);
+		this.jogadores.add(novoJogador);
+
+		// Ordena a lista (quem tem mais pontos vai pro topo)
+		Collections.sort(this.jogadores);
+
+		// Salva a lista inteira no arquivo ranking.txt
+		this.salvar();
+	}
+
+	// Pega apenas os 10 melhores para mostrar na tela
+	public List<Jogador> getTop10() {
+		if (this.jogadores.size() > 10) {
+			return new ArrayList<>(this.jogadores.subList(0, 10)); // Retorna do 1º ao 10º
 		}
-
-		Jogador novo = new Jogador(nome, pontuacao, fase);
-		jogadores.add(novo);
-		Collections.sort(jogadores);
-
-		// Manter apenas os 10 melhores
-		if (jogadores.size() > MAX_JOGADORES) {
-			jogadores = jogadores.subList(0, MAX_JOGADORES);
-		}
-
-		salvar();
+		return new ArrayList<>(this.jogadores); // Se tiver menos de 10, retorna o que tem
 	}
 
 	/**
@@ -132,9 +131,7 @@ public class Ranking {
 		return new ArrayList<>(jogadores);
 	}
 
-	/**
-	 * Retorna o rank de um jogador (1-based), ou -1 se não estiver no ranking.
-	 */
+
 	public int getRank(String nome) {
 		for (int i = 0; i < jogadores.size(); i++) {
 			if (jogadores.get(i).nome.equals(nome)) {
@@ -156,9 +153,6 @@ public class Ranking {
 		return -1;
 	}
 
-	/**
-	 * Limpa todo o ranking (útil para testes).
-	 */
 	public void limpar() {
 		jogadores.clear();
 		salvar();

@@ -1,0 +1,158 @@
+CHECKLIST DE IMPLEMENTAÇÃO: CARDLAYOUT COM MÚLTIPLAS INSTÂNCIAS
+================================================================
+
+ANTES DE COMEÇAR:
+=================
+
+[ ] Compreendi que WHEN_IN_FOCUSED_WINDOW causa conflito
+[ ] Compreendi que WHEN_FOCUSED é a solução
+[ ] Tenho acesso ao código de PainelMenuAcao
+[ ] Tenho acesso ao código de TelasJogo
+
+ETAPA 1: IDENTIFICAR PROBLEMAS EXISTENTES
+==========================================
+
+[ ] Encontrei InputMap com WHEN_IN_FOCUSED_WINDOW
+[ ] Encontrei múltiplas instâncias da classe interna
+[ ] Identifiquei os nomes das instâncias (ex: painelPausa, painelGameOver)
+[ ] Encontrei a chamada de layout.show() para cada instância
+
+ETAPA 2: REMOVER CONFLITOS
+===========================
+
+[ ] Removi todos os KeyListeners da classe interna
+[ ] Removi todas as referências a addKeyListener
+[ ] Verifi quei se não há múltiplos InputMaps no construtor
+
+ETAPA 3: IMPLEMENTAR A SOLUÇÃO
+===============================
+
+No construtor de PainelMenuAcao:
+
+[ ] Adicionei: setFocusable(true);
+[ ] Mudei para: InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+[ ] Criei ActionMap: ActionMap am = getActionMap();
+[ ] Mapeei VK_UP com "moveUp"
+[ ] Mapeei VK_DOWN com "moveDown"
+[ ] Mapeei VK_ENTER com "select"
+[ ] Mapeei VK_ESCAPE com "escape"
+[ ] Cada action chama o método correto
+
+ETAPA 4: IMPLEMENTAR FOCO CORRETO
+==================================
+
+Após layout.show(container, "PAUSE"):
+
+[ ] Adicionei: SwingUtilities.invokeLater(() -> { ... });
+[ ] Dentro do invokeLater:
+    [ ] container.revalidate();
+    [ ] container.repaint();
+    [ ] painelPausa.requestFocusInWindow();
+
+Após layout.show(container, "GAMEOVER"):
+
+[ ] Adicionei: SwingUtilities.invokeLater(() -> { ... });
+[ ] Dentro do invokeLater:
+    [ ] container.revalidate();
+    [ ] container.repaint();
+    [ ] painelGameOver.requestFocusInWindow();
+
+ETAPA 5: REMOVER MÉTODOS QUE NÃO EXISTEM
+==========================================
+
+[ ] Removi chamadas a painelJogoAtual.continuarJogo()
+[ ] Substituí por painelJogoAtual.alternarPausa()
+[ ] Verifiquei que os métodos existem em PainelJogoV2
+
+ETAPA 6: COMPILAÇÃO
+====================
+
+[ ] Deletei a pasta "bin"
+[ ] Executei compilar_fix_cardlayout.bat
+[ ] Não há erros de compilação
+[ ] Não há warnings não esperados
+
+ETAPA 7: TESTE FUNCIONAL
+=========================
+
+[ ] Iniciei o jogo
+[ ] Pausei o jogo (ESC)
+[ ] Naveguei com CIMA/BAIXO
+[ ] Pressionei ENTER na opção correta
+[ ] ✓ Ação foi executada corretamente
+
+[ ] Continuei o jogo
+[ ] Deixei Game Over acontecer
+[ ] Naveguei com CIMA/BAIXO
+[ ] Pressionei ENTER na opção 2 (NOVO JOGO)
+[ ] ✓ Voltou para Menu Principal
+
+[ ] Executei novamente
+[ ] Tudo funcionou sem problemas
+
+ETAPA 8: DEBUG (Se necessário)
+===============================
+
+Se algo não funcionou, verifique:
+
+[ ] InputMap realmente usa WHEN_FOCUSED?
+    (print: System.out.println(im);)
+
+[ ] O painel tem foco?
+    (Adicione: System.out.println("Tem foco: " + hasFocus());)
+
+[ ] requestFocusInWindow() foi chamado?
+    (Adicione: System.out.println("Pedindo foco...");)
+
+[ ] Há KeyListener ainda ativo?
+    (Procure por: addKeyListener)
+
+[ ] Há múltiplos InputMaps?
+    (Procure por: InputMap im = getInputMap)
+
+ETAPA 9: OTIMIZAÇÃO
+====================
+
+[ ] Removi System.out.println de debug
+[ ] Verifiquei se há memória vazando
+[ ] Testei múltiplas vezes de forma consecutiva
+
+ETAPA 10: DOCUMENTAÇÃO
+=======================
+
+Você tem acesso a:
+
+[ ] SOLUCAO_COMPLETA_CARDLAYOUT.txt
+[ ] GUIA_PRATICO_FIX_CARDLAYOUT.txt
+[ ] ANALISE_TECNICA_WHEN_FOCUSED.md
+[ ] FAQ_CARDLAYOUT.txt
+[ ] EXEMPLO_COMPLETO_CARDLAYOUT.txt
+
+RESUMO:
+=======
+
+Se você marcou tudo como [x], então:
+
+✅ Seu CardLayout está funcionando perfeitamente
+✅ Não há mais conflito de foco
+✅ Apenas um painel recebe eventos por vez
+✅ Opções executam corretamente
+
+PRÓXIMAS ETAPAS:
+================
+
+1. Mantenha o código assim
+2. Se adicionar novos painéis no CardLayout, repita o checklist
+3. Sempre use WHEN_FOCUSED para múltiplas instâncias
+4. Sempre chame requestFocusInWindow() após layout.show()
+
+SE AINDA TIVER PROBLEMAS:
+==========================
+
+1. Consulte FAQ_CARDLAYOUT.txt
+2. Revise ANALISE_TECNICA_WHEN_FOCUSED.md
+3. Compare seu código com EXEMPLO_COMPLETO_CARDLAYOUT.txt
+4. Compile do zero: deletar bin e recompilar
+
+STATUS: ✓ CHECKLIST COMPLETO
+Data: 23 de fevereiro de 2026

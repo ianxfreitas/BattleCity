@@ -1,0 +1,133 @@
+SOLUÇÃO COMPLETA: CONFLITO DE FOCO CARDLAYOUT
+==============================================
+
+PROBLEMA:
+Na tela de GAME OVER, ao navegar para opção 2 ('NOVO JOGO / SAIR') 
+e pressionar ENTER, o evento era recebido pela instância errada 
+(ou ambas simultaneamente), causando comportamento inesperado.
+
+DIAGNÓSTICO:
+Ambas as instâncias de PainelMenuAcao (PAUSE e GAMEOVER) estavam 
+usando WHEN_IN_FOCUSED_WINDOW, permitindo que ambas recebessem 
+eventos de teclado ao mesmo tempo.
+
+SOLUÇÃO APLICADA:
+
+1. Mudança Principal (TelasJogo.java, classe PainelMenuAcao):
+   
+   ANTES:
+   InputMap im = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+   
+   DEPOIS:
+   InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+
+2. Garantir focabilidade:
+   
+   setFocusable(true);
+
+3. Solicitar foco após mostrar painel:
+   
+   layout.show(container, "PAUSE");
+   SwingUtilities.invokeLater(() -> {
+       painelPausa.requestFocusInWindow();
+   });
+
+4. Remover conflito com método inexistente:
+   
+   Removido: painelJogoAtual.continuarJogo()
+   Substituído por: painelJogoAtual.alternarPausa()
+
+RESULTADO:
+
+✅ Apenas o painel visível no CardLayout recebe eventos
+✅ Cursor mantém o valor correto
+✅ Ações executam no painel correto
+✅ Sem interferência entre PAUSE e GAMEOVER
+
+IMPLEMENTAÇÃO TÉCNICA:
+
+O WHEN_FOCUSED garante isolamento através do sistema de foco do Swing:
+
+   JComponent.WHEN_FOCUSED (correto):
+   - InputMap ativo apenas quando painel tem foco
+   - Apenas um painel tem foco por vez
+   - Cada painel processa seu próprio evento
+   - Resultado: Isolado, previsível
+
+   JComponent.WHEN_IN_FOCUSED_WINDOW (incorreto):
+   - InputMap ativo enquanto janela tem foco
+   - Não importa qual painel está visível
+   - Múltiplos painéis processam o mesmo evento
+   - Resultado: Conflituoso, imprevisível
+
+CÓDIGO FINAL (PainelMenuAcao constructor):
+
+```java
+public PainelMenuAcao(String titulo, Color corTitulo) {
+    this.titulo = titulo;
+    this.corTitulo = corTitulo;
+    setBackground(COR_FUNDO);
+    
+    setFocusable(true);
+    
+    // ← CHAVE: WHEN_FOCUSED, não WHEN_IN_FOCUSED_WINDOW
+    InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+    ActionMap am = getActionMap();
+    
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "moveUp");
+    am.put("moveUp", new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cursor = (cursor - 1 < 0) ? 2 : cursor - 1;
+            repaint();
+        }
+    });
+    
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "moveDown");
+    am.put("moveDown", new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cursor = (cursor + 1 > 2) ? 0 : cursor + 1;
+            repaint();
+        }
+    });
+    
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "select");
+    am.put("select", new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            executarAcao();
+        }
+    });
+    
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escape");
+    am.put("escape", new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cursor = 0;
+            executarAcao();
+        }
+    });
+}
+```
+
+TESTE E VALIDAÇÃO:
+
+1. Compilar: compilar_fix_cardlayout.bat
+2. Iniciar jogo
+3. Ir para Game Over
+4. Navegar com CIMA/BAIXO até opção 2
+5. Pressionar ENTER
+6. ✓ ESPERADO: Volta para menu principal
+
+ARQUIVOS GERADOS:
+
+- SOLUCAO_CARDLAYOUT_CONFLITO_FOCO.md
+- GUIA_PRATICO_FIX_CARDLAYOUT.txt
+- ANALISE_TECNICA_WHEN_FOCUSED.md
+- compilar_fix_cardlayout.bat
+- Este documento (SOLUCAO_COMPLETA_CARDLAYOUT.txt)
+
+STATUS: ✅ SOLUÇÃO COMPLETA E IMPLEMENTADA
+
+Data: 23 de fevereiro de 2026

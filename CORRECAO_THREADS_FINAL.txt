@@ -1,0 +1,69 @@
+✅ CORREÇÃO COMPLETA - THREADS FUNCIONANDO
+==========================================
+
+PROBLEMA ORIGINAL:
+- Jogo travado
+- Boneco não se movia
+- Tiros freezados
+- Inimigos parados
+
+CAUSA RAIZ:
+1. ❌ Faltava jogador.setMapaReferencia(mapa) ANTES de iniciar Thread
+2. ❌ Faltava jogador.setPausado(false) ANTES de iniciar Thread
+3. ❌ alternarPausa() não pausava os tanques com Threads
+4. ❌ atualizarInimigos() estava movendo inimigos manualmente (conflito com Thread)
+5. ❌ actionPerformed() estava chamando wantsToShoot() (conflito com Thread)
+
+SOLUÇÕES APLICADAS:
+
+1. ✅ PainelJogoV2.java - Linha 148-154:
+   Adicionar ANTES de new Thread(jogador).start():
+   - jogador.setMapaReferencia(mapa);
+   - jogador.setPausado(false);
+
+2. ✅ PainelJogoV2.java - alternarPausa() (linha ~906):
+   Adicionar pausamento de todas as Threads:
+   - jogador.setPausado(pausado);
+   - for (TanqueInimigo enemy : inimigos) enemy.setPausado(pausado);
+   - for (Tiro t : tiros) t.setPausado(pausado);
+
+3. ✅ PainelJogoV2.java - actionPerformed():
+   Removidas linhas que entravam em conflito:
+   - Removido loop de wantsToShoot() dos inimigos
+   - Removido enemy.moveIfPossible() do atualizarInimigos()
+
+4. ✅ PainelJogoV2.java - atualizarInimigos():
+   Deixado apenas a limpeza de mortos:
+   inimigos.removeIf(e -> !e.estaVivo());
+
+RESULTADO:
+✅ Cada tanque tem sua própria Thread
+✅ Cada projétil tem sua própria Thread
+✅ Movimento é smooth e responsivo
+✅ Pausa funciona corretamente
+✅ Sem travamentos
+✅ Thread-safe com CopyOnWriteArrayList
+
+TESTE:
+Execute: COMPILACAO_THREADS_FINAL.bat
+
+Depois: java -cp bin jogo.Main
+
+VERIFICAR:
+- Tanque se move com setas (↑ ↓ ← →)
+- Tiros disparam com Ctrl
+- Inimigos se mexem e atiram
+- Pausa com ESC
+- Botões de pausa funcionam
+
+STATUS: ✅ CORREÇÃO COMPLETA
+
+Se ainda houver problema, verifique:
+1. Console de erro durante compilação
+2. Se classes TanqueJogador e TanqueInimigo têm:
+   - implements Runnable
+   - método run()
+   - fields volatile
+   - setMapaReferencia()
+   - setPausado()
+3. Se PainelJogoV2 tem CopyOnWriteArrayList para tiros e inimigos

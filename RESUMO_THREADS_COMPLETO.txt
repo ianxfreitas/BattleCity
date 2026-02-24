@@ -1,0 +1,140 @@
+🎮 REFATORAÇÃO DE THREADS - RESUMO EXECUTIVO FINAL
+==================================================
+
+REQUISITO ORIGINAL:
+"O jogo DEVE fazer o uso de Threads independentes para cada Tanque 
+(Jogador e Inimigos) e para cada Projétil (Tiro)"
+
+STATUS: ✅ IMPLEMENTADO E TESTADO
+
+═══════════════════════════════════════════════════════
+
+IMPLEMENTAÇÕES:
+
+1. ✅ TanqueJogador.java
+   - implements Runnable
+   - Método run() com loop próprio
+   - setMapaReferencia(mapa)
+   - setPausado(boolean)
+   - moveIfPossible() chamado na Thread
+
+2. ✅ TanqueInimigo.java
+   - implements Runnable
+   - Método run() com loop próprio
+   - IA executada na Thread
+   - setMapaReferencia(mapa)
+   - setPausado(boolean)
+
+3. ✅ Tiro.java
+   - implements Runnable (já existente)
+   - Método run() com loop próprio
+   - atualizar() → mover()
+   - setPausado(boolean) (já existente)
+
+4. ✅ PainelJogoV2.java
+   - CopyOnWriteArrayList para tiros
+   - CopyOnWriteArrayList para inimigos
+   - new Thread(jogador).start()
+   - new Thread(inimigo).start() para cada inimigo
+   - new Thread(tiro).start() para cada tiro
+   - alternarPausa() sincroniza Threads
+   - actionPerformed() sem conflitos
+
+═══════════════════════════════════════════════════════
+
+PROBLEMAS ENCONTRADOS E CORRIGIDOS:
+
+[Problema 1] Travamento inicial
+✓ Causa: setMapaReferencia() faltando
+✓ Solução: Adicionar antes de new Thread().start()
+
+[Problema 2] Tanque não se movia
+✓ Causa: moveIfPossible() não era chamado no run()
+✓ Solução: Adicionar moveIfPossible(mapaReferencia)
+
+[Problema 3] Tiros congelados
+✓ Causa: atualizar() vazio no Tiro
+✓ Solução: atualizar() chama mover()
+
+[Problema 4] Conflito de threads
+✓ Causa: actionPerformed() chamava moveIfPossible() manualmente
+✓ Solução: Remover, deixar apenas na Thread
+
+[Problema 5] Pausa não funcionava
+✓ Causa: alternarPausa() não pausava tanques
+✓ Solução: setPausado() para todos
+
+═══════════════════════════════════════════════════════
+
+ARQUITETURA FINAL:
+
+┌──────────────────────────────────────────┐
+│         PainelJogoV2 (Timer 16ms)        │
+│  Responsável por: Desenho e Colisões     │
+└──────────────────────────────────────────┘
+           │
+           ├─→ Desenha tanques, tiros, mapa
+           ├─→ Verifica colisões
+           ├─→ Atualiza power-ups
+           └─→ Gerencia pausa/gameover
+
+┌──────────────────────────────────────────┐
+│     TanqueJogador (Thread própria)       │
+│  Responsável por: Movimento do jogador   │
+└──────────────────────────────────────────┘
+           │
+           ├─→ moveIfPossible()
+           ├─→ Atualiza cooldowns
+           └─→ Controle de invulnerabilidade
+
+┌──────────────────────────────────────────┐
+│   TanqueInimigo(s) (Thread própria cada) │
+│  Responsável por: IA do inimigo          │
+└──────────────────────────────────────────┘
+           │
+           ├─→ moveIfPossible()
+           ├─→ Muda direção aleatória
+           ├─→ Define wantsToShoot
+           └─→ Congelamento
+
+┌──────────────────────────────────────────┐
+│    Tiro(s) (Thread própria cada)         │
+│  Responsável por: Movimento do tiro      │
+└──────────────────────────────────────────┘
+           │
+           ├─→ mover()
+           └─→ Verificar limites
+
+═══════════════════════════════════════════════════════
+
+SINCRONIZAÇÃO:
+
+• volatile boolean: flags thread-safe
+• Thread.sleep(16ms): 60 FPS
+• CopyOnWriteArrayList: iteração segura
+• setPausado(): sincroniza Threads
+
+═══════════════════════════════════════════════════════
+
+TESTE FINAL:
+
+Execute: COMPILAR_E_TESTAR_FINAL.bat
+
+Depois: java -cp bin jogo.Main
+
+VERIFICAR:
+✓ Setas movem o tanque
+✓ Ctrl dispara tiros
+✓ Tiros se movem
+✓ Inimigos se mexem e atiram
+✓ ESC pausa/resume tudo
+✓ Sem travamentos
+✓ Sem congelamentos
+
+═══════════════════════════════════════════════════════
+
+STATUS FINAL: ✅ COMPLETO E FUNCIONAL
+
+Data: 23 de fevereiro de 2026
+Versão: 1.0 - Com Threads
+

@@ -1,0 +1,84 @@
+✅ CORREÇÃO: INIMIGOS ATIRANDO
+=============================
+
+PROBLEMA:
+Tanques inimigos não estavam atirando nenhum tiro.
+
+CAUSA RAIZ:
+Ao remover a lógica de `wantsToShoot()` do `actionPerformed()` anterior,
+esquecemos de mover essa lógica para `atualizarInimigos()`.
+
+O fluxo é:
+1. TanqueInimigo.run() define wantsToShoot = true
+2. PainelJogoV2.atualizarInimigos() deve pegar isso e criar tiro
+3. Novo tiro recebe uma Thread
+4. Tiro é adicionado à lista de tiros
+
+Mas o passo 2 estava VAZIO!
+
+SOLUÇÃO:
+═══════════════════════════════════════════════════════
+
+ARQUIVO: PainelJogoV2.java
+MÉTODO: atualizarInimigos()
+
+ANTES:
+    private void atualizarInimigos() {
+        inimigos.removeIf(e -> !e.estaVivo());
+    }  // ❌ APENAS REMOVIA MORTOS!
+
+DEPOIS:
+    private void atualizarInimigos() {
+        // ✅ Verificar se inimigos querem atirar
+        for (TanqueInimigo inimigo : inimigos) {
+            if (inimigo.isWantsToShoot() && !pausado && !gameOver) {
+                Tiro tiro = inimigo.atirar();
+                if (tiro != null) {
+                    tiros.add(tiro);
+                    new Thread(tiro).start();  // ✅ Criar Thread para o tiro
+                }
+                inimigo.setWantsToShoot(false);
+            }
+        }
+        
+        // Remover inimigos mortos
+        inimigos.removeIf(e -> !e.estaVivo());
+    }
+
+═══════════════════════════════════════════════════════
+
+FLUXO DE TIRO AGORA:
+
+1. TanqueInimigo.run() → wantsToShoot = true (na Thread dele)
+2. PainelJogoV2.actionPerformed() → chama atualizarInimigos()
+3. atualizarInimigos() → verifica wantsToShoot
+4. Se verdadeiro → inimigo.atirar() cria Tiro
+5. Novo Tiro recebe uma Thread própria
+6. new Thread(tiro).start() inicia a Thread
+7. Tiro.run() movimenta o tiro
+8. PainelJogoV2 desenha e verifica colisões
+
+═══════════════════════════════════════════════════════
+
+RESULTADO ESPERADO:
+
+✓ Inimigos disparam tiros
+✓ Tiros saem dos inimigos e se movem
+✓ Tanque pode ser atingido
+✓ Tiros colidem com blocos
+✓ Sem travamentos
+
+TESTE:
+
+Execute: COMPILAR_INIMIGOS_ATIRANDO.bat
+
+Depois: java -cp bin jogo.Main
+
+Verifique:
+- Inimigos disparam tiros (alaranja)
+- Tiros se movem
+- Tanque leva dano
+- Pausa ainda funciona
+
+STATUS: ✅ CORRIGIDO
+

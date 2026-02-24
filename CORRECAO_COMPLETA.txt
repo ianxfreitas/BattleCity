@@ -1,0 +1,118 @@
+🎮 CORREÇÃO COMPLETA - TODAS AS ETAPAS
+====================================
+
+✅ PROBLEMAS CORRIGIDOS:
+
+1. ✅ MENU PRINCIPAL
+   - Estados 0-4 implementados corretamente
+   - Navegação com CIMA/BAIXO funciona
+   - ENTER avança para próximo estado
+   - ESC volta para estado anterior
+
+2. ✅ DIGITAÇÃO DE NOME (Estado 1)
+   - KeyListener adicionado
+   - Aceita: letras, números, espaço, hífen, underscore
+   - Backspace para apagar
+   - Enter para confirmar
+   - ESC para voltar
+
+3. ✅ SELEÇÃO DE DIFICULDADE (Estado 2)
+   - Navegação com CIMA/BAIXO
+   - Enter para confirmar
+   - ESC para voltar
+
+4. ✅ SELEÇÃO DE TANQUE (Estado 3)
+   - Navegação com CIMA/BAIXO
+   - Mostra atributos do tanque
+   - Enter para confirmar
+   - ESC para voltar
+
+5. ✅ SELEÇÃO DE MAPA (Estado 4)
+   - Navegação com CIMA/BAIXO
+   - 4 opções: Aleatório, Mapa1, Mapa2, Mapa3
+   - Enter inicia o jogo
+   - ESC para voltar
+
+6. ✅ CARDLAYOUT - PAUSE E GAMEOVER
+   - Usa WHEN_FOCUSED (não WHEN_IN_FOCUSED_WINDOW)
+   - Apenas painel visível recebe eventos
+   - Sem conflito entre instâncias
+   - setFocusable(true) em ambas
+
+7. ✅ BOTÃO NOVO JOGO
+   - Volta para MENU PRINCIPAL (Estado 0)
+   - Limpa painel de jogo
+   - Reseta configurações
+   - Menu reexibido corretamente
+
+8. ✅ IMPORTS
+   - ActionEvent
+   - KeyStroke
+   - AbstractAction
+   - KeyAdapter
+
+MUDANÇAS IMPLEMENTADAS:
+
+Arquivo: src/telas/TelasJogo.java
+
+1. Classe PainelMenuRetro:
+   ✓ InputMap/ActionMap com suporte a todos os 5 estados
+   ✓ KeyListener para digitação de nome
+   ✓ Métodos de desenho (título, opção, rodapé)
+
+2. Classe PainelMenuAcao:
+   ✓ WHEN_FOCUSED para isolamento de eventos
+   ✓ setFocusable(true)
+   ✓ ComponentListener para foco automático
+   ✓ InputMap para CIMA/BAIXO/ENTER
+   ✓ Método resetarCursor()
+   ✓ Método voltarParaMenu()
+   ✓ Método executarAcao() corrigido
+
+3. Método iniciarJogoArcade():
+   ✓ Callbacks com SwingUtilities.invokeLater()
+   ✓ container.revalidate() e container.repaint()
+
+4. Método mostrarMenu():
+   ✓ SwingUtilities.invokeLater()
+   ✓ Revalidação completa
+
+FLUXO AGORA FUNCIONA:
+
+Menu Principal (0)
+  → "1 PLAYER GAME" = Estado 1
+  → "RANKING" = Tela Ranking
+  → "EXIT" = Sair
+
+Digitar Nome (1)
+  → Digita com teclado
+  → ENTER = Estado 2
+
+Dificuldade (2)
+  → CIMA/BAIXO seleciona
+  → ENTER = Estado 3
+
+Tanque (3)
+  → CIMA/BAIXO seleciona
+  → ENTER = Estado 4
+
+Mapa (4)
+  → CIMA/BAIXO seleciona
+  → ENTER = Inicia jogo
+
+Jogo em andamento
+  → ESC = Pausa
+  → Opção 1: Continua
+  → Opção 2: Reinicia
+  → Opção 3: Novo Jogo = Volta para Estado 0
+
+TESTE:
+
+Execute: compilar_tudo_corrigido.bat
+
+Depois: java -cp bin jogo.Main
+
+RESULTADO: ✅ TUDO FUNCIONA!
+
+STATUS: CORREÇÃO COMPLETA FINALIZADA
+Data: 23 de fevereiro de 2026

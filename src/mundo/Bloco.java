@@ -39,7 +39,7 @@ public class Bloco {
 	private int y; // posição em pixels (linha * tamanho)
 	private int tamanho;
 	private TipoBloco tipo;
-	private int vida; // para blocos destrutíveis (Tijolo=1, Aço=2)
+	private int vida;
 	private boolean ativo;
 
 	public Bloco(int x, int y, int tamanho, TipoBloco tipo) {
@@ -49,7 +49,6 @@ public class Bloco {
 		this.tipo = tipo;
 		this.ativo = true;
 
-		// Inicializar vida baseado no tipo
 		switch (tipo) {
 			case TIJOLO -> this.vida = 1;
 			case ACO -> this.vida = 2;
@@ -115,8 +114,7 @@ public class Bloco {
 				g.drawLine(cx + 6, cy, cx + 2, cy + 2);
 				break;
 
-			default: // VAZIO
-				// não desenha nada
+			default:
 				break;
 		}
 	}
@@ -134,7 +132,6 @@ public class Bloco {
 		return new Rectangle(x, y, tamanho, tamanho);
 	}
 
-	// Getters
 	public int getX() { return x; }
 	public int getY() { return y; }
 	public int getTamanho() { return tamanho; }

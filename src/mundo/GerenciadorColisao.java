@@ -4,24 +4,22 @@ import java.util.List;
 import java.util.Optional;
 import objeto.*;
 
-/**
- * Gerencia colisões entre objetos do jogo.
- * Centraliza a lógica de detecção de colisões para melhor encapsulamento.
- */
 public class GerenciadorColisao {
 
 	public GerenciadorColisao() {
 	}
 
 	/**
-	 * Verifica colisão entre dois objetos usando AABB.
+	 * Verifica colisão entre dois objetos colidíveis.
 	 */
 	public static boolean verificaColisao(Colidivel obj1, Colidivel obj2) {
 		return obj1.getBounds().intersects(obj2.getBounds());
 	}
 
+
 	/**
-	 * Verifica se um objeto colide com qualquer um em uma lista.
+	 * Verifica colisão entre um objeto e uma lista de objetos.
+	 * Retorna o primeiro objeto da lista que colide, ou Optional.empty() se nenhum colidir.
 	 */
 	public static <T extends Colidivel> Optional<T> verificaColisaoComLista(
 		Colidivel objeto, List<T> lista) {
@@ -34,7 +32,9 @@ public class GerenciadorColisao {
 	}
 
 	/**
-	 * Verifica colisão entre um tiro e um bloco do mapa.
+	 * Verifica colisão entre um tiro e o mapa.
+	 * Tiros colidem com: PAREDE, TIJOLO, ACO, BASE
+	 * Tiros NÃO colidem com: AGUA, ARVORE, VAZIO
 	 */
 	public static boolean verificaColisaoComMapa(Tiro tiro, Mapa mapa) {
 		int col = tiro.getX() / Mapa.TAMANHO;
@@ -45,7 +45,10 @@ public class GerenciadorColisao {
 		}
 
 		int tipo = mapa.getMatriz()[row][col];
-		return tipo == 1; // parede (tipo 1)
+		// Tiros colidem com: PAREDE, TIJOLO, ACO, BASE
+		// Tiros NÃO colidem com: AGUA, ARVORE, VAZIO
+		return tipo == Mapa.PAREDE || tipo == Mapa.TIJOLO || 
+		       tipo == Mapa.ACO || tipo == Mapa.BASE;
 	}
 
 	/**
@@ -77,7 +80,8 @@ public class GerenciadorColisao {
 	}
 
 	/**
-	 * Verifica se um objeto pode se mover para uma posição considerando o mapa.
+	 * Verifica se um tanque pode se mover para a nova posição sem colidir com o mapa.
+	 * Considera os blocos que impedem movimento: PAREDE, AGUA, TIJOLO, ACO, BASE
 	 */
 	public static boolean podeMoverse(int novaX, int novaY, int largura, int altura, Mapa mapa) {
 		int leftCol = novaX / Mapa.TAMANHO;
@@ -93,7 +97,11 @@ public class GerenciadorColisao {
 		int[][] mat = mapa.getMatriz();
 		for (int r = topRow; r <= bottomRow; r++) {
 			for (int c = leftCol; c <= rightCol; c++) {
-				if (mat[r][c] == 1) { // parede
+				int tipoBloco = mat[r][c];
+				// Blocos que IMPEDEM movimento: PAREDE, AGUA, TIJOLO, ACO, BASE
+				if (tipoBloco == Mapa.PAREDE || tipoBloco == Mapa.AGUA || 
+				    tipoBloco == Mapa.TIJOLO || tipoBloco == Mapa.ACO || 
+				    tipoBloco == Mapa.BASE) {
 					return false;
 				}
 			}
@@ -113,7 +121,7 @@ public class GerenciadorColisao {
 		}
 
 		int tipo = mapa.getMatriz()[row][col];
-		return tipo == 2; // base (tipo 2)
+		return tipo == Mapa.BASE;
 	}
 
 	/**

@@ -1,0 +1,225 @@
+EXEMPLO COMPLETO: CARDLAYOUT COM MÚLTIPLAS INSTÂNCIAS
+=======================================================
+
+Este é um exemplo funcional de como implementar corretamente
+um CardLayout com múltiplas instâncias de uma classe interna.
+
+CLASSE PRINCIPAL (Simplificada):
+================================
+
+```java
+public class MinhaAplicacao extends JFrame {
+    private CardLayout layout;
+    private JPanel container;
+    
+    private PainelMenuAcao painelPausa;
+    private PainelMenuAcao painelGameOver;
+    
+    public MinhaAplicacao() {
+        setTitle("Minha Aplicação");
+        setSize(800, 600);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+        layout = new CardLayout();
+        container = new JPanel(layout);
+        container.setBackground(Color.BLACK);
+        
+        // Criar as duas instâncias
+        painelPausa = new PainelMenuAcao("PAUSADO", Color.CYAN);
+        painelGameOver = new PainelMenuAcao("GAME OVER", Color.RED);
+        
+        // Adicionar ao container
+        container.add(painelPausa, "PAUSE");
+        container.add(painelGameOver, "GAMEOVER");
+        
+        add(container);
+        setVisible(true);
+    }
+    
+    // Quando o jogo é pausado:
+    public void mostrarPausa() {
+        layout.show(container, "PAUSE");
+        SwingUtilities.invokeLater(() -> {
+            container.revalidate();
+            container.repaint();
+            painelPausa.requestFocusInWindow();
+        });
+    }
+    
+    // Quando o jogo termina:
+    public void mostrarGameOver() {
+        layout.show(container, "GAMEOVER");
+        SwingUtilities.invokeLater(() -> {
+            container.revalidate();
+            container.repaint();
+            painelGameOver.requestFocusInWindow();
+        });
+    }
+    
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MinhaAplicacao::new);
+    }
+}
+```
+
+CLASSE INTERNA (PainelMenuAcao):
+=================================
+
+```java
+private class PainelMenuAcao extends JPanel {
+    private String titulo;
+    private Color corTitulo;
+    private int cursor = 0; // 0=Continuar, 1=Reiniciar, 2=Novo Jogo
+    
+    public PainelMenuAcao(String titulo, Color corTitulo) {
+        this.titulo = titulo;
+        this.corTitulo = corTitulo;
+        setBackground(Color.BLACK);
+        
+        // ← IMPORTANTE: Garantir focabilidade
+        setFocusable(true);
+        
+        // ← CHAVE: Usar WHEN_FOCUSED (NÃO WHEN_IN_FOCUSED_WINDOW!)
+        InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = getActionMap();
+        
+        // Tecla CIMA
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "moveUp");
+        am.put("moveUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cursor = (cursor - 1 < 0) ? 2 : cursor - 1;
+                repaint();
+                System.out.println(titulo + " - Cursor: " + cursor);
+            }
+        });
+        
+        // Tecla BAIXO
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "moveDown");
+        am.put("moveDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cursor = (cursor + 1 > 2) ? 0 : cursor + 1;
+                repaint();
+                System.out.println(titulo + " - Cursor: " + cursor);
+            }
+        });
+        
+        // Tecla ENTER
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "select");
+        am.put("select", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(titulo + " - Executando opção: " + cursor);
+                executarAcao();
+            }
+        });
+        
+        // Tecla ESCAPE
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escape");
+        am.put("escape", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cursor = 0;
+                executarAcao();
+            }
+        });
+    }
+    
+    private void executarAcao() {
+        if (cursor == 0) {
+            // OPÇÃO 1: CONTINUAR
+            System.out.println("Opção 1 executada");
+        } else if (cursor == 1) {
+            // OPÇÃO 2: REINICIAR
+            System.out.println("Opção 2 executada");
+        } else if (cursor == 2) {
+            // OPÇÃO 3: NOVO JOGO / SAIR
+            System.out.println("Opção 3 executada");
+        }
+        cursor = 0;
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        
+        int h = getHeight();
+        int w = getWidth();
+        
+        // Desenhar título
+        g2d.setColor(corTitulo);
+        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+        FontMetrics fm = g2d.getFontMetrics();
+        int x = (w - fm.stringWidth(titulo)) / 2;
+        g2d.drawString(titulo, x, h / 4);
+        
+        // Desenhar opções
+        int menuY = h / 2;
+        desenharOpcao(g2d, "CONTINUAR", menuY, cursor == 0);
+        desenharOpcao(g2d, "REINICIAR", menuY + 60, cursor == 1);
+        desenharOpcao(g2d, "NOVO JOGO", menuY + 120, cursor == 2);
+    }
+    
+    private void desenharOpcao(Graphics2D g2d, String texto, int y, boolean selecionado) {
+        g2d.setFont(new Font("Arial", Font.PLAIN, 24));
+        
+        if (selecionado) {
+            g2d.setColor(Color.YELLOW);
+            g2d.drawString(">> " + texto, 100, y);
+        } else {
+            g2d.setColor(Color.WHITE);
+            g2d.drawString("   " + texto, 100, y);
+        }
+    }
+}
+```
+
+FLUXO DE EXECUÇÃO:
+==================
+
+1. Criar aplicação
+2. Adicionar duas instâncias de PainelMenuAcao
+3. mostrarPausa() → layout.show(container, "PAUSE")
+4. requestFocusInWindow() para painelPausa
+5. Usuário navega e pressiona ENTER
+6. APENAS painelPausa recebe o evento (WHEN_FOCUSED garante isto)
+7. executarAcao() é chamado em painelPausa
+8. painelGameOver NÃO recebe o evento (está sem foco)
+
+TESTE PRÁTICO:
+==============
+
+1. Compile e execute
+2. Sistema inicia com PAUSA visível
+3. Pressione CIMA/BAIXO para navegar
+4. Console mostra: "PAUSADO - Cursor: X"
+5. Pressione ENTER
+6. Console mostra: "PAUSADO - Executando opção: X"
+7. Mude para GAMEOVER (simulando game over)
+8. Repita passos 3-6
+9. Console mostra: "GAME OVER - Cursor: X"
+10. Confirme que PAUSA NÃO aparece no console
+
+EVIDÊNCIA DE FUNCIONAMENTO:
+============================
+
+Se funcionar corretamente, você verá no console:
+
+   PAUSADO - Cursor: 0
+   PAUSADO - Cursor: 1
+   PAUSADO - Cursor: 2
+   PAUSADO - Executando opção: 2
+   GAME OVER - Cursor: 0
+   GAME OVER - Cursor: 1
+   GAME OVER - Executando opção: 1
+
+Observe que:
+✓ Apenas um painel recebe eventos por vez
+✓ Cursor é mantido corretamente
+✓ Opção correta é executada
+✓ Sem interferência entre instâncias
+
+STATUS: ✓ EXEMPLO COMPLETO FORNECIDO

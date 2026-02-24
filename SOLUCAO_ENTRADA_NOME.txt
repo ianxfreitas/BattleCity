@@ -1,0 +1,94 @@
+SOLUÇÃO: NÃO CONSEGUIA DIGITAR O NOME DO JOGADOR
+=================================================
+
+PROBLEMA:
+A tela de digitação de nome não permitia entrada de texto.
+
+CAUSA:
+O código não tinha KeyListener para capturar a digitação de caracteres.
+Havia apenas InputMap/ActionMap para navegação (setas, ENTER, ESC),
+que não funcionam para capturar digitação de texto.
+
+SOLUÇÃO IMPLEMENTADA:
+
+Adicionado KeyListener com suporte a:
+
+✅ Digitação de caracteres:
+   - Letras (A-Z, a-z)
+   - Números (0-9)
+   - Espaço
+   - Hífen (-)
+   - Underscore (_)
+   - Máximo: 20 caracteres
+
+✅ Backspace:
+   - Apaga o último caractere digitado
+
+✅ Enter:
+   - Confirma o nome e vai para a próxima tela (dificuldade)
+   - Só funciona se o nome não for vazio
+
+✅ ESC:
+   - Volta para o menu principal
+
+CÓDIGO ADICIONADO (após InputMap):
+
+```java
+addKeyListener(new java.awt.event.KeyAdapter() {
+    @Override
+    public void keyTyped(java.awt.event.KeyEvent e) {
+        if (estado == 1) { // Apenas durante digitação
+            char c = e.getKeyChar();
+            
+            if (Character.isLetterOrDigit(c) || c == ' ' || c == '_' || c == '-') {
+                if (nomeDigitado.length() < 20) {
+                    nomeDigitado += c;
+                    repaint();
+                }
+            }
+            e.consume();
+        }
+    }
+    
+    @Override
+    public void keyPressed(java.awt.event.KeyEvent e) {
+        if (estado == 1) {
+            int tecla = e.getKeyCode();
+            
+            if (tecla == VK_BACK_SPACE) {
+                if (nomeDigitado.length() > 0) {
+                    nomeDigitado = nomeDigitado.substring(0, nomeDigitado.length() - 1);
+                    repaint();
+                }
+            }
+            else if (tecla == VK_ENTER) {
+                if (!nomeDigitado.trim().isEmpty()) {
+                    estado = 2; // Ir para dificuldade
+                    repaint();
+                }
+            }
+            else if (tecla == VK_ESCAPE) {
+                estado = 0; // Voltar ao menu
+                repaint();
+            }
+            e.consume();
+        }
+    }
+});
+```
+
+ARQUIVO MODIFICADO:
+src/telas/TelasJogo.java
+├─ Classe PainelMenuRetro
+│  └─ Construtor: +KeyListener para digitação
+
+TESTE:
+
+1. Compile: compilar_entrada_nome.bat
+2. Execute: java -cp bin jogo.Main
+3. Selecione "1 PLAYER GAME"
+4. Digite um nome
+5. Pressione ENTER para confirmar
+6. ✓ Deve ir para tela de dificuldade
+
+STATUS: ✅ PROBLEMA RESOLVIDO

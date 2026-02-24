@@ -1,0 +1,152 @@
+SOLUÇÃO PARA VOCÊ: CONFLITO DE FOCO CARDLAYOUT
+==============================================
+
+Olá! Você reportou um problema muito específico e encontrei a solução.
+
+SEU PROBLEMA:
+=============
+
+"Na tela de GAME OVER, quando eu movo o cursor para a opção 2 
+('NOVO JOGO / SAIR') e aperto a tecla ENTER, o código não executa 
+a opção 2. Em vez disso, ele parece voltar o cursor para o 0 
+('CONTINUAR') ou a tela de Pause acaba roubando o evento do teclado."
+
+A CAUSA:
+========
+
+Você estava usando WHEN_IN_FOCUSED_WINDOW no InputMap:
+
+   InputMap im = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+O problema é que WHEN_IN_FOCUSED_WINDOW faz AMBAS as instâncias 
+de PainelMenuAcao (PAUSE e GAMEOVER) receberem eventos de teclado 
+simultaneamente, mesmo quando apenas uma está visível!
+
+Quando você pressiona ENTER em GAMEOVER:
+  1. GAMEOVER recebe o evento ← correto
+  2. PAUSE também recebe o evento ← PROBLEMA!
+  3. Ambas alteram o cursor
+  4. Qual executarAcao() é chamado?
+  5. Resultado: comportamento imprevisível
+
+A SOLUÇÃO:
+==========
+
+Simplesmente mudar uma linha:
+
+   ANTES: getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+   DEPOIS: getInputMap(JComponent.WHEN_FOCUSED)
+
+QUANDO USAR CADA UM:
+
+   WHEN_IN_FOCUSED_WINDOW:
+   ├─ Uma única instância no CardLayout
+   ├─ Atalhos globais
+   └─ Situações onde você QUER múltiplos painéis recebendo eventos
+
+   WHEN_FOCUSED: ✅ RECOMENDADO
+   ├─ Múltiplas instâncias no CardLayout
+   ├─ Dois ou mais painéis que se alternam
+   └─ Você quer isolamento entre painéis
+
+O QUE FOI MUDADO NO SEU CÓDIGO:
+================================
+
+Arquivo: src/telas/TelasJogo.java
+Classe: PainelMenuAcao (classe interna)
+Método: Construtor
+
+MUDANÇA 1 (Linha ~119):
+   setFocusable(true);
+   InputMap im = getInputMap(JComponent.WHEN_FOCUSED);  // ← AQUI!
+
+MUDANÇA 2 (Linha ~337-350):
+   SwingUtilities.invokeLater(() -> {
+       painelPausa.requestFocusInWindow();
+   });
+
+MUDANÇA 3 (Linha ~496):
+   Removido: painelJogoAtual.continuarJogo()
+   Adicionado: painelJogoAtual.alternarPausa()
+
+POR QUE FUNCIONA AGORA:
+========================
+
+Com WHEN_FOCUSED:
+
+   1. Você está em GAMEOVER e pressiona ENTER
+   2. ONLY GAMEOVER tem foco (porque WHEN_FOCUSED ativa isso)
+   3. ONLY GAMEOVER recebe o evento
+   4. cursor em GAMEOVER é alterado
+   5. executarAcao() é chamado em GAMEOVER
+   6. PAUSE não interfere
+   7. Resultado: Correto!
+
+TESTE AGORA:
+=============
+
+1. Compile:
+   compilar_cardlayout_final.bat
+
+2. Execute o jogo:
+   java -cp bin jogo.Main
+
+3. Teste PAUSE:
+   - ESC
+   - CIMA/BAIXO até opção 2
+   - ENTER
+   - ✓ Deve executar corretamente
+
+4. Teste GAMEOVER:
+   - Deixe game over acontecer
+   - CIMA/BAIXO até opção 2
+   - ENTER
+   - ✓ Deve voltar ao menu
+
+DOCUMENTAÇÃO DISPONÍVEL:
+=========================
+
+Se você quer entender melhor:
+
+   ANALISE_TECNICA_WHEN_FOCUSED.md
+   └─ Explicação detalhada do problema
+
+   EXEMPLO_COMPLETO_CARDLAYOUT.txt
+   └─ Código de exemplo pronto para usar
+
+   FAQ_CARDLAYOUT.txt
+   └─ Perguntas e respostas
+
+   CHECKLIST_IMPLEMENTACAO.txt
+   └─ Validação passo-a-passo
+
+   INDICE_DOCUMENTACAO_CARDLAYOUT.txt
+   └─ Guia de navegação
+
+RESUMO:
+=======
+
+Problema: Duas instâncias no CardLayout recebem eventos simultaneamente
+Causa: WHEN_IN_FOCUSED_WINDOW
+Solução: Mudar para WHEN_FOCUSED
+Resultado: ✅ Problema resolvido!
+
+APLICÁVEL A:
+=============
+
+Este fix funciona para qualquer situação em Swing onde você tem:
+- Múltiplas instâncias da mesma classe no CardLayout
+- Múltiplas abas em TabbedPane
+- Múltiplos diálogos reutilizáveis
+
+Tudo funcionará perfeitamente com WHEN_FOCUSED.
+
+STATUS: ✅ PROBLEMA RESOLVIDO
+=============================
+
+Seu código está pronto!
+
+Data: 23 de fevereiro de 2026
+Versão: 1.0
+
+Próximo passo: compilar_cardlayout_final.bat

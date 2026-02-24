@@ -33,3 +33,4 @@ bin/
 *.iml
 gen/
 *.md
+*.bat

@@ -1,8 +1,5 @@
 package objeto;
 
-/**
- * Interface que define o contrato para objetos afetados por time-based effects.
- */
 public interface Temporizado {
 	/**
 	 * Atualiza o estado do objeto no tempo.

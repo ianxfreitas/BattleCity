@@ -1,0 +1,101 @@
+✅ SOLUÇÃO FINAL - PROBLEMA DE MOVIMENTO RESOLVIDO
+===================================================
+
+PROBLEMAS IDENTIFICADOS:
+
+1. ❌ TanqueJogador.run() - Linha 343-356
+   Problema: Chamava atualizar() (vazio) mas NÃO chamava moveIfPossible()
+   Solução: Adicionar moveIfPossible(mapaReferencia) no run()
+
+2. ❌ Tiro.atualizar() - Linha 79-80
+   Problema: Método vazio! Não fazia nada
+   Solução: Fazer atualizar() chamar mover()
+
+3. ✅ TanqueInimigo.run() 
+   Status: Já estava correto
+
+CORREÇÕES APLICADAS:
+
+═══════════════════════════════════════════════════════
+
+ARQUIVO: TanqueJogador.java
+MÉTODO: run()
+
+ANTES:
+    public void run() {
+        while (ativo && estaVivo()) {
+            if (!pausado && mapaReferencia != null) {
+                atualizar();  // ❌ VAZIO!
+                // moveIfPossible(mapaReferencia);  // ❌ COMENTADO!
+            }
+            Thread.sleep(16);
+        }
+    }
+
+DEPOIS:
+    public void run() {
+        while (ativo && estaVivo()) {
+            if (!pausado && mapaReferencia != null) {
+                // ✅ Atualizar cooldowns
+                if (shootCooldown > 0) shootCooldown--;
+                if (invulneravel) {
+                    tempoInvulnerabilidade--;
+                    if (tempoInvulnerabilidade <= 0) {
+                        invulneravel = false;
+                    }
+                }
+                // ✅ MOVER O TANQUE (IMPORTANTE!)
+                moveIfPossible(mapaReferencia);
+            }
+            Thread.sleep(16);
+        }
+    }
+
+═══════════════════════════════════════════════════════
+
+ARQUIVO: Tiro.java
+MÉTODO: atualizar()
+
+ANTES:
+    public void atualizar() {
+    }  // ❌ VAZIO!
+
+DEPOIS:
+    public void atualizar() {
+        // ✅ Chamar mover() para atualizar posição
+        mover();
+    }
+
+═══════════════════════════════════════════════════════
+
+RESULTADO ESPERADO:
+
+✅ Tanque se move com setas
+✅ Tiros saem do tanque e se movem
+✅ Inimigos se mexem e atiram
+✅ Colisões funcionam
+✅ Pausa com ESC funciona
+
+PRÓXIMO PASSO:
+
+Execute: COMPILAR_E_TESTAR_FINAL.bat
+
+Depois: java -cp bin jogo.Main
+
+VERIFICAÇÃO:
+
+1. Aperte seta CIMA/BAIXO/ESQUERDA/DIREITA
+   → Tanque deve se mover
+   
+2. Aperte CTRL para atirar
+   → Tiro deve sair e se mover
+   
+3. Observe os inimigos
+   → Devem se mexer e atirar
+   
+4. Aperte ESC
+   → Deve pausar e despausar
+   
+Se tudo funcionar: ✅ PROBLEMA RESOLVIDO!
+
+═══════════════════════════════════════════════════════

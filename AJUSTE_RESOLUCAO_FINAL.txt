@@ -1,0 +1,61 @@
+# ✅ AJUSTE DE RESOLUÇÃO - CONCLUÍDO
+
+## 🎯 Resumo das Mudanças
+
+### Dimensões Ajustadas:
+
+```
+ANTES:
+  Janela:      820 x 870  (desproporcionado)
+  Mapa:        780 x 780  (13x13 × 60px)
+  HUD:         +200px
+  
+DEPOIS:
+  Janela:      1024 x 768 (proporção 4:3)
+  Mapa:        832 x 832  (13x13 × 64px)
+  HUD:         +180px
+```
+
+---
+
+## 📝 Arquivos Modificados
+
+### 1. `src/mundo/Mapa.java`
+```java
+TAMANHO = 60  →  TAMANHO = 64
+```
+
+### 2. `src/telas/PainelJogoV2.java`
+```java
+larguraComHUD = largoMapa + 200  →  largoMapa + 180
+```
+
+### 3. `src/telas/TelasJogo.java`
+```java
+setSize(820, 870)  →  setSize(1024, 768)
+```
+
+---
+
+## 🚀 Para Testar
+
+```bash
+compilar.bat
+executar.bat
+```
+
+---
+
+## ✨ Resultado
+
+```
+✅ Resolução 1024x768 (proporção 4:3 padrão)
+✅ Blocos maiores (64px - mais visíveis)
+✅ Mapa melhor proporcionado
+✅ HUD com espaço equilibrado
+✅ Tela profissional e bem ajustada
+```
+
+---
+
+**AJUSTE COMPLETO!** ✅

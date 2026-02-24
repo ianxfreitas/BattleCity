@@ -1,0 +1,125 @@
+RESUMO EXECUTIVO: SOLUÇÃO PARA CARDLAYOUT COM MÚLTIPLAS INSTÂNCIAS
+===================================================================
+
+PROBLEMA RELATADO:
+Na tela de GAME OVER, ao navegar para opção 2 e pressionar ENTER,
+o evento era ignorado ou executado incorretamente.
+
+CAUSA RAIZ:
+Ambas as instâncias de PainelMenuAcao (PAUSE e GAMEOVER) estavam
+usando WHEN_IN_FOCUSED_WINDOW, permitindo que ambas recebessem
+eventos de teclado simultaneamente, causando conflito.
+
+SOLUÇÃO IMPLEMENTADA:
+
+┌──────────────────────────────────────────┐
+│  1. Mudar WHEN_IN_FOCUSED_WINDOW para    │
+│     WHEN_FOCUSED                         │
+│                                          │
+│  2. Adicionar setFocusable(true)         │
+│                                          │
+│  3. Chamar requestFocusInWindow() após   │
+│     layout.show()                        │
+│                                          │
+│  4. Usar SwingUtilities.invokeLater()    │
+│     para timing correto                  │
+│                                          │
+│  5. Remover conflitos (KeyListener,      │
+│     métodos inexistentes)                │
+└──────────────────────────────────────────┘
+
+RESULTADO:
+✅ Apenas o painel visível recebe eventos de teclado
+✅ Cursor mantém o valor correto
+✅ Opção 2 executa corretamente
+✅ Sem interferência entre PAUSE e GAMEOVER
+
+ARQUIVOS MODIFICADOS:
+→ src/telas/TelasJogo.java
+
+MUDANÇAS ESPECÍFICAS:
+
+Linha ~119:
+   ANTES: getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+   DEPOIS: getInputMap(JComponent.WHEN_FOCUSED)
+
+Linha ~120:
+   ADICIONADO: setFocusable(true);
+
+Linha ~337-352:
+   Callbacks com SwingUtilities.invokeLater()
+   e requestFocusInWindow()
+
+Linha ~496:
+   REMOVIDO: painelJogoAtual.continuarJogo()
+   ADICIONADO: painelJogoAtual.alternarPausa()
+
+DOCUMENTAÇÃO CRIADA:
+
+1. SOLUCAO_COMPLETA_CARDLAYOUT.txt
+   → Solução técnica completa
+
+2. GUIA_PRATICO_FIX_CARDLAYOUT.txt
+   → Guia passo-a-passo simples
+
+3. ANALISE_TECNICA_WHEN_FOCUSED.md
+   → Análise detalhada do problema
+
+4. FAQ_CARDLAYOUT.txt
+   → Perguntas e respostas
+
+5. EXEMPLO_COMPLETO_CARDLAYOUT.txt
+   → Código de exemplo funcional
+
+6. CHECKLIST_IMPLEMENTACAO.txt
+   → Lista de verificação
+
+7. compilar_fix_cardlayout.bat
+   → Script para compilação
+
+COMO TESTAR:
+
+1. Compile:
+   compilar_fix_cardlayout.bat
+
+2. Execute o jogo
+
+3. Teste PAUSE:
+   - ESC para pausar
+   - CIMA/BAIXO até opção 2
+   - ENTER
+   - ✓ Resultado esperado: Volta ao menu
+
+4. Teste GAMEOVER:
+   - Deixe game over acontecer
+   - CIMA/BAIXO até opção 2
+   - ENTER
+   - ✓ Resultado esperado: Volta ao menu
+
+SE NÃO FUNCIONAR:
+
+1. Verifique FAQ_CARDLAYOUT.txt
+2. Confirme que InputMap usa WHEN_FOCUSED
+3. Confirme que setFocusable(true) foi adicionado
+4. Confirme que requestFocusInWindow() é chamado
+5. Recompile do zero (delete bin/)
+
+CONHECIMENTO ADQUIRIDO:
+
+Este problema exemplifica um padrão comum em Swing:
+- WHEN_IN_FOCUSED_WINDOW para componentes únicos
+- WHEN_FOCUSED para CardLayout com múltiplas instâncias
+
+Aplicável a:
+- Múltiplos painéis no CardLayout
+- Múltiplas abas em TabbedPane
+- Múltiplos diálogos
+- Qualquer situação com instâncias múltiplas
+
+STATUS: ✅ SOLUÇÃO COMPLETA IMPLEMENTADA
+
+Data: 23 de fevereiro de 2026
+Versão: 1.0
+
+Para mais informações, consulte os documentos de suporte
+listados acima.

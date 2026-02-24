@@ -1,0 +1,152 @@
+FAQ: PROBLEMAS E SOLUÇÕES - CARDLAYOUT COM MÚLTIPLAS INSTÂNCIAS
+================================================================
+
+P1: Ainda estou recebendo eventos de ambos os painéis!
+────────────────────────────────────────────────────
+
+A: Verifique:
+   ☐ InputMap está realmente usando WHEN_FOCUSED?
+   ☐ setFocusable(true) foi adicionado?
+   ☐ requestFocusInWindow() é chamado após layout.show()?
+   ☐ Não há KeyListener conflitante?
+   
+   Se tudo acima está certo, recompile do zero:
+   - Delete a pasta "bin"
+   - Execute compilar_fix_cardlayout.bat
+
+P2: O método requestFocusInWindow() não funciona!
+──────────────────────────────────────────────────
+
+A: Use SwingUtilities.invokeLater():
+
+   layout.show(container, "PAUSE");
+   SwingUtilities.invokeLater(() -> {
+       painelPausa.requestFocusInWindow();
+   });
+   
+   Isso garante que o painel foi renderizado antes de receber foco.
+
+P3: Mesmo com WHEN_FOCUSED, o outro painel ainda recebe eventos!
+────────────────────────────────────────────────────────────────
+
+A: Provavelmente há um KeyListener ativo. Verifique:
+   
+   ❌ addKeyListener(new KeyAdapter() { ... })
+   
+   Se encontrar, remova-o e use apenas InputMap.
+
+P4: O cursor fica resetando para 0!
+───────────────────────────────────
+
+A: Isso significa que ambos os painéis estão recebendo ENTER.
+   Volta para P1 - verificar se InputMap está correto.
+   
+   Ou então há multiplicação de eventos. Tente:
+   
+   im.put(..., "enter");
+   am.put("enter", new AbstractAction() {
+       @Override
+       public void actionPerformed(ActionEvent e) {
+           if (isShowing()) {  // ← Adicione isto!
+               executarAcao();
+           }
+       }
+   });
+
+P5: Como debugar se está funcionando?
+─────────────────────────────────────
+
+A: Adicione debug:
+
+   am.put("select", new AbstractAction() {
+       @Override
+       public void actionPerformed(ActionEvent e) {
+           System.out.println("ENTER em: " + titulo);
+           System.out.println("Cursor: " + cursor);
+           executarAcao();
+       }
+   });
+   
+   Execute e veja qual painel está recebendo o evento.
+
+P6: Qual é a diferença entre WHEN_FOCUSED e WHEN_ANCESTOR_OF_FOCUSED_COMPONENT?
+──────────────────────────────────────────────────────────────────────────────
+
+A: 
+   WHEN_FOCUSED:
+   - InputMap ativo quando ESTE painel tem foco
+   - Mais restritivo, mais seguro
+   - RECOMENDADO para CardLayout
+   
+   WHEN_ANCESTOR_OF_FOCUSED_COMPONENT:
+   - InputMap ativo quando este painel é ancestral do componente com foco
+   - Mais permissivo
+   - Pode causar problemas com CardLayout
+   
+   Use WHEN_FOCUSED para evitar conflitos.
+
+P7: Preciso manter WHEN_IN_FOCUSED_WINDOW por algum motivo?
+───────────────────────────────────────────────────────────
+
+A: WHEN_IN_FOCUSED_WINDOW é útil apenas para:
+   - Painéis únicos (sem instâncias múltiplas)
+   - Atalhos globais da aplicação
+   - Menus que não usam CardLayout
+   
+   Para CardLayout com múltiplas instâncias: SEMPRE use WHEN_FOCUSED.
+
+P8: E se o painel não receber nenhum evento agora?
+───────────────────────────────────────────────────
+
+A: O painel precisa ter foco. Verifique:
+   
+   ☐ requestFocusInWindow() foi chamado?
+   ☐ O painel está visível (isShowing() == true)?
+   ☐ setFocusable(true) foi chamado?
+   ☐ Nenhum outro painel está "roubando" o foco?
+   
+   Adicione debug:
+   
+   @Override
+   public void paintComponent(Graphics g) {
+       System.out.println(getTitle() + " - Tem foco? " + hasFocus());
+       // ... resto do paint ...
+   }
+
+P9: Como sei se meu CardLayout está correto?
+──────────────────────────────────────────────
+
+A: Teste assim:
+   
+   1. Pause o jogo
+   2. Clique com mouse no painel de pausa
+   3. Pressione CIMA/BAIXO/ENTER
+   4. ✓ Se funcionar: InputMap está correto
+   5. ✓ Se funcionar mesmo sem clicar: requestFocusInWindow() está funcionando
+
+P10: Posso usar KeyListener e InputMap juntos?
+───────────────────────────────────────────────
+
+A: NÃO RECOMENDADO. Pode causar:
+   - Eventos duplicados
+   - Comportamento inesperado
+   - Dificuldade de debugar
+   
+   Escolha UMA abordagem:
+   ✓ InputMap/ActionMap (RECOMENDADO)
+   ✗ KeyListener (evite em CardLayout)
+
+RESUMO RÁPIDO:
+==============
+
+Para CardLayout com múltiplas instâncias:
+
+1. Use WHEN_FOCUSED (não WHEN_IN_FOCUSED_WINDOW)
+2. Adicione setFocusable(true)
+3. Chame requestFocusInWindow() após layout.show()
+4. Use SwingUtilities.invokeLater() para timing
+5. Remova KeyListeners conflitantes
+
+Pronto! Seu CardLayout funcionará perfeitamente.
+
+STATUS: ✓ FAQ CONCLUÍDO
