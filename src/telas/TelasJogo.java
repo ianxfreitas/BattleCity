@@ -706,17 +706,21 @@ public class TelasJogo extends JFrame {
 		sb.append("POS | JOGADOR          | PONTOS | FASE\n");
 		sb.append("========================================\n");
 
-		// Use o getTop10() para garantir que só apareçam os 10 melhores
-		List<Ranking.Jogador> lista = ranking.getTop10();
+		// Use o getJogadores() ou getTop10()
+		List<Ranking.Jogador> lista = ranking.getJogadores();
 
-		for (int i = 0; i < lista.size(); i++) {
-			Ranking.Jogador j = lista.get(i);
-			sb.append(String.format("%2dº | %-16s | %6d | %2d\n",
-					(i + 1), j.nome, j.pontuacao, j.fase));
+		if (lista.isEmpty()) {
+			sb.append(" -  | NENHUM REGISTRO  |  0     |  -  \n");
+		} else {
+			for (int i = 0; i < lista.size(); i++) {
+				Ranking.Jogador j = lista.get(i);
+				sb.append(String.format("%3d | %-16s | %6d | %3d\n", i + 1, j.nome, j.pontuacao, j.fase));
+			}
 		}
 
 		if (areaRanking != null) {
-			areaRanking.setText(sb.toString());
+			areaRanking.setText(sb.toString()); // Atualiza o texto na interface
+			areaRanking.setFocusable(false);
 		}
 	}
 
