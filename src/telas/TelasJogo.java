@@ -17,16 +17,14 @@ import java.util.List;
  */
 public class TelasJogo extends JFrame {
 
-	// ==========================================
 	// PALETA DE CORES RETRO DELUXE
-	// ==========================================
+	private JTextArea areaRanking;
 	private final Color COR_FUNDO = Color.BLACK;
 	private final Color COR_TITULO_TOPO = new Color(255, 200, 0); // Dourado
 	private final Color COR_TITULO_SOMBRA = new Color(180, 100, 0); // Laranja escuro
 	private final Color COR_TEXTO_NORMAL = Color.WHITE;
 	private final Color COR_DESTAQUE = Color.CYAN; // Azul elétrico para seleção
 	private final Color COR_SUBTITULO = new Color(150, 150, 150); // Cinza
-	// ==========================================
 
 	private CardLayout layout;
 	private JPanel container;
@@ -86,16 +84,14 @@ public class TelasJogo extends JFrame {
 	private void mostrarMenu() {
 		layout.show(container, "MENU");
 		SwingUtilities.invokeLater(() -> {
+			painelMenu.resetarMenu();
+			painelMenu.requestFocusInWindow(); // Garante que o menu aceite teclado de novo
 			container.revalidate();
 			container.repaint();
-			painelMenu.resetarMenu();
-			painelMenu.requestFocusInWindow();
 		});
 	}
 
-	// =========================================================
 	// PAINEL DE MENU RETRO DELUXE
-	// =========================================================
 	private class PainelMenuRetro extends JPanel {
 		// Estados: 0=Menu, 1=Nome, 2=Dificuldade, 3=Tanque, 4=Mapa
 		private int estado = 0;
@@ -119,8 +115,6 @@ public class TelasJogo extends JFrame {
 			});
 			timerPiscar.start();
 
-			// IMPORTANTE: Usar WHEN_FOCUSED (NÃO WHEN_IN_FOCUSED_WINDOW)
-			// Isso garante que APENAS o painel com foco receba os eventos
 			InputMap im = getInputMap(JComponent.WHEN_FOCUSED);
 			ActionMap am = getActionMap();
 
@@ -164,7 +158,10 @@ public class TelasJogo extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					if (estado == 0) {
 						if (cursorPrincipal == 0) estado = 1;
-						else if (cursorPrincipal == 1) layout.show(container, "RANKING");
+						else if (cursorPrincipal == 1) {
+							atualizarRanking(); // <<--- CHAMA A ATUALIZAÇÃO ANTES DE TROCAR
+							layout.show(container, "RANKING");
+						}
 						else if (cursorPrincipal == 2) System.exit(0);
 					} else if (estado == 2) {
 						estado = 3;
@@ -186,9 +183,7 @@ public class TelasJogo extends JFrame {
 				}
 			});
 
-			// ==========================================
 			// KEYLISTENER PARA DIGITAÇÃO DE NOME
-			// ==========================================
 			addKeyListener(new java.awt.event.KeyAdapter() {
 				@Override
 				public void keyTyped(java.awt.event.KeyEvent e) {
@@ -203,13 +198,13 @@ public class TelasJogo extends JFrame {
 							}
 						}
 						
-						e.consume(); // Consumir o evento para evitar bips
+						e.consume();
 					}
 				}
 				
 				@Override
 				public void keyPressed(java.awt.event.KeyEvent e) {
-					if (estado == 1) { // Apenas durante digitação de nome
+					if (estado == 1) {
 						int tecla = e.getKeyCode();
 						
 						// Backspace para apagar
@@ -256,7 +251,7 @@ public class TelasJogo extends JFrame {
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 			int h = getHeight();
 
-			if (estado == 0) { // --- MENU PRINCIPAL ---
+			if (estado == 0) { // MENU PRINCIPAL
 				desenharTituloRetro(g2d, "BATTLE CITY", h / 4, 60f);
 				desenharTextoCentralizado(g2d, "EDICAO DELUXE", h / 4 + 50, fonteRetro.deriveFont(20f), COR_DESTAQUE);
 
@@ -266,7 +261,7 @@ public class TelasJogo extends JFrame {
 				desenharOpcaoRetro(g2d, "EXIT", menuY + 100, cursorPrincipal == 2);
 				desenharRodape(g2d, "PRESS START / ENTER", h - 50);
 
-			} else if (estado == 1) { // --- DIGITAR NOME ---
+			} else if (estado == 1) { // DIGITAR NOME
 				desenharTituloRetro(g2d, "REGISTRO", h / 4, 40f);
 				desenharTextoCentralizado(g2d, "DIGITE SEU CODINOME:", h / 4 + 60, fonteRetro.deriveFont(18f), COR_SUBTITULO);
 
@@ -279,7 +274,7 @@ public class TelasJogo extends JFrame {
 				g2d.drawString(textoFinal, (getWidth() - fm.stringWidth(textoFinal)) / 2, boxY);
 				desenharRodape(g2d, "[ENTER] CONFIRMA  [ESC] VOLTA", h - 50);
 
-			} else if (estado == 2) { // --- DIFICULDADE ---
+			} else if (estado == 2) { // DIFICULDADE
 				desenharTituloRetro(g2d, "DIFICULDADE", h / 5, 30f);
 				int menuY = h / 2 - 50;
 				desenharOpcaoRetro(g2d, "RECRUTA (FACIL)", menuY, cursorDificuldade == 0);
@@ -287,7 +282,7 @@ public class TelasJogo extends JFrame {
 				desenharOpcaoRetro(g2d, "ELITE (DIFICIL)", menuY + 90, cursorDificuldade == 2);
 				desenharRodape(g2d, "[ENTER] PROXIMO  [ESC] VOLTA", h - 50);
 
-			} else if (estado == 3) { // --- ESCOLHER TANQUE ---
+			} else if (estado == 3) { // ESCOLHER TANQUE
 				desenharTituloRetro(g2d, "SELECIONE O TANQUE", h / 5, 30f);
 				int menuY = h / 2 - 50;
 				desenharOpcaoRetro(g2d, "MODELO AGIL", menuY, cursorTanque == 0);
@@ -304,7 +299,7 @@ public class TelasJogo extends JFrame {
 				desenharTextoCentralizado(g2d, stats, statsY + 30, fonteRetro.deriveFont(18f), COR_DESTAQUE);
 				desenharRodape(g2d, "[ENTER] PROXIMO  [ESC] VOLTA", h - 50);
 
-			} else if (estado == 4) { // --- ESCOLHER MAPA ---
+			} else if (estado == 4) { // ESCOLHER MAPA
 				desenharTituloRetro(g2d, "ZONA DE BATALHA", h / 5, 30f);
 				int menuY = h / 2 - 60;
 				desenharOpcaoRetro(g2d, "ALEATORIO [?]", menuY, cursorMapa == 0);
@@ -315,7 +310,6 @@ public class TelasJogo extends JFrame {
 			}
 		}
 
-		// --- Helpers de Desenho ---
 		private void desenharTituloRetro(Graphics2D g2d, String texto, int y, float tamanho) {
 			g2d.setFont(fonteRetro.deriveFont(tamanho));
 			FontMetrics fm = g2d.getFontMetrics();
@@ -380,7 +374,7 @@ public class TelasJogo extends JFrame {
 
 		painelJogoAtual = new PainelJogoV2(config,
 				() -> {
-					// --- AÇÃO DE GAME OVER ---
+					// AÇÃO DE GAME OVER
 					layout.show(container, "GAMEOVER");
 					SwingUtilities.invokeLater(() -> {
 						container.revalidate();
@@ -414,8 +408,9 @@ public class TelasJogo extends JFrame {
 		titulo.setForeground(COR_TITULO_TOPO);
 		titulo.setBorder(BorderFactory.createEmptyBorder(30, 0, 20, 0));
 
-		JTextArea areaRanking = new JTextArea();
+		areaRanking = new JTextArea();
 		areaRanking.setEditable(false);
+		areaRanking.setFocusable(false); // IMPORTANTE: Impede o texto de roubar o teclado
 		areaRanking.setBackground(COR_FUNDO);
 		areaRanking.setForeground(COR_TEXTO_NORMAL);
 
@@ -423,20 +418,6 @@ public class TelasJogo extends JFrame {
 		else areaRanking.setFont(new Font("Monospaced", Font.PLAIN, 16));
 
 		areaRanking.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("POS | JOGADOR          | PONTOS | FASE\n");
-		sb.append("========================================\n");
-		List<Ranking.Jogador> jogadores = ranking.getJogadores();
-		if (jogadores.isEmpty()) {
-			sb.append(" -  | NENHUM REGISTRO  |  0     |  -  \n");
-		} else {
-			for (int i = 0; i < jogadores.size(); i++) {
-				Ranking.Jogador j = jogadores.get(i);
-				sb.append(String.format("%3d | %-16s | %6d | %3d\n", i + 1, j.nome, j.pontuacao, j.fase));
-			}
-		}
-		areaRanking.setText(sb.toString());
 
 		JPanel panelBotao = new JPanel();
 		panelBotao.setBackground(COR_FUNDO);
@@ -447,15 +428,22 @@ public class TelasJogo extends JFrame {
 		if (fonteRetro != null) btnVoltar.setFont(fonteRetro.deriveFont(14f));
 		btnVoltar.setFocusPainted(false);
 		btnVoltar.setBorder(BorderFactory.createLineBorder(COR_DESTAQUE, 2));
-		btnVoltar.addActionListener(e -> mostrarMenu());
+
+		// Ação do Botão
+		btnVoltar.addActionListener(e -> {
+			System.out.println("Botão Voltar clicado!"); // Debug no console
+			mostrarMenu();
+		});
 
 		panelBotao.add(btnVoltar);
 		panelBotao.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
 
+		// READICIONANDO O ESC (Essa parte é essencial para o teclado funcionar)
 		panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "voltarMenu");
 		panel.getActionMap().put("voltarMenu", new AbstractAction() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent e) {
+				System.out.println("ESC pressionado!"); // Debug no console
 				mostrarMenu();
 			}
 		});
@@ -464,6 +452,7 @@ public class TelasJogo extends JFrame {
 		panel.add(areaRanking, BorderLayout.CENTER);
 		panel.add(panelBotao, BorderLayout.SOUTH);
 
+		panel.setFocusable(true);
 		return panel;
 	}
 
@@ -707,6 +696,27 @@ public class TelasJogo extends JFrame {
 
 			g2d.setColor(COR_DESTAQUE);
 			g2d.drawString(texto, xTexto, h / 2 + 50);
+		}
+	}
+
+	public void atualizarRanking() {
+		this.ranking.carregar();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("POS | JOGADOR          | PONTOS | FASE\n");
+		sb.append("========================================\n");
+
+		// Use o getTop10() para garantir que só apareçam os 10 melhores
+		List<Ranking.Jogador> lista = ranking.getTop10();
+
+		for (int i = 0; i < lista.size(); i++) {
+			Ranking.Jogador j = lista.get(i);
+			sb.append(String.format("%2dº | %-16s | %6d | %2d\n",
+					(i + 1), j.nome, j.pontuacao, j.fase));
+		}
+
+		if (areaRanking != null) {
+			areaRanking.setText(sb.toString());
 		}
 	}
 

@@ -105,15 +105,22 @@ public class Ranking {
 	 * Adiciona um novo jogador ao ranking (se qualificar).
 	 */
 	public void adicionarJogador(String nome, int pontos, int fase) {
-		// Adiciona o jogador na lista, independente da pontuação
-		Jogador novoJogador = new Jogador(nome, pontos, fase);
-		this.jogadores.add(novoJogador);
+		// 1. Limpa o nome para evitar erros de vírgula no arquivo txt
+		String nomeLimpo = nome.replace(",", " ");
 
-		// Ordena a lista (quem tem mais pontos vai pro topo)
-		Collections.sort(this.jogadores);
+		// 2. Adiciona o novo recorde
+		jogadores.add(new Jogador(nomeLimpo, pontos, fase));
 
-		// Salva a lista inteira no arquivo ranking.txt
-		this.salvar();
+		// 3. Ordena (Maiores pontos primeiro)
+		Collections.sort(jogadores);
+
+		// 4. MANTÉM APENAS OS 10 MELHORES (Isso evita bugs de atualização)
+		if (jogadores.size() > MAX_JOGADORES) {
+			jogadores = new ArrayList<>(jogadores.subList(0, MAX_JOGADORES));
+		}
+
+		// 5. Salva fisicamente no HD
+		salvar();
 	}
 
 	// Pega apenas os 10 melhores para mostrar na tela

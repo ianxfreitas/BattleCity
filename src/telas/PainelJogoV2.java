@@ -34,6 +34,8 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 	private List<PowerUp> powerUps = new ArrayList<>();
 	private ControleTeclado controle;
 	private Timer timer;
+	private Runnable onGameOver; // Ação para quando o jogador perde
+	private Runnable onPause;    // Ação para quando o jogo pausa
 	private boolean gameOverProcessado = false;
 
 	private String powerUpAtivoTexto = "NENHUM";
@@ -56,9 +58,9 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 	private long tempoPausadoInicio = 0;
 
 	// Sistema de blocos destrutíveis
-	private int[][] mapaAtual; // Cópia mutável da matriz do mapa para destruição de blocos
+	private int[][] mapaAtual;
 
-	// Painel HUD (será adicionado ao lado)
+	// Painel HUD
 	private int largoMapa;
 	private int altoMapa;
 
@@ -113,7 +115,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			this.mapaAtual[i] = mapaOriginal[i].clone();
 		}
 
-		// Criar wrapper que usa a matriz mutável
 		final int[][] matrizFinal = this.mapaAtual;
 		this.mapa = new Mapa() {
 			@Override
@@ -125,15 +126,12 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		largoMapa = Mapa.COLUNAS * Mapa.TAMANHO;
 		altoMapa = Mapa.LINHAS * Mapa.TAMANHO;
 
-		// HUD panel: 192 pixels na largura para o painel lateral (melhor proporcionado)
 		int larguraComHUD = largoMapa + 192;
 
 		setPreferredSize(new Dimension(larguraComHUD, altoMapa));
 		setMinimumSize(new Dimension(larguraComHUD, altoMapa));
 		setMaximumSize(new Dimension(larguraComHUD, altoMapa));
 		setSize(new Dimension(larguraComHUD, altoMapa));
-
-		// ... (o resto do método continua EXATAMENTE igual) ...
 
 		// Criar tanque do jogador
 		int tamanhoTanque = Mapa.TAMANHO * 3 / 4;
@@ -147,7 +145,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		// Aplicar tipo de tanque selecionado
 		aplicarTipoTanque();
 
-		// ✅ CRITICAL FIX: Passar mapa e despauser antes de iniciar Thread
 		jogador.setMapaReferencia(mapa);
 		jogador.setPausado(false);
 		new Thread(jogador).start();
@@ -185,7 +182,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		});
 		requestFocusInWindow();
 
-		// Timer ~60 FPS
 		timer = new Timer(16, this);
 		timer.start();
 
@@ -300,17 +296,14 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		// 1. Desenhar o mapa principal (Chão, Tijolo, Aço, Água, Base)
 		if (mapa != null) {
 			mapa.desenhar(g);
 		}
 
-		// 2. Desenhar power-ups (ficam no chão, embaixo dos tanques)
 		for (PowerUp pu : powerUps) {
 			pu.desenhar(g);
 		}
 
-		// 3. Desenhar tanques (passam por cima do chão e pegam os itens)
 		if (jogador != null) {
 			jogador.desenhar(g);
 		}
@@ -318,17 +311,14 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			enemy.desenhar(g);
 		}
 
-		// 4. Desenhar as ÁRVORES! (A camuflagem: pintamos por cima dos tanques)
 		if (mapa != null) {
 			mapa.desenharArvores(g);
 		}
 
-		// 5. Desenhar tiros (voam por cima de tudo, até das árvores, para você ver onde atira)
 		for (Tiro t : tiros) {
 			t.desenhar(g);
 		}
 
-		// 6. Desenhar HUD (sempre no topo da tela)
 		desenharHUD(g);
 	}
 
@@ -336,11 +326,9 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		// Posição X onde começa o painel lateral
 		int hudX = largoMapa;
 
-		// Desenhar um fundo cinza para o painel lateral
 		g.setColor(new Color(40, 40, 40));
 		g.fillRect(hudX, 0, 192, altoMapa);
 
-		// Linha divisória
 		g.setColor(Color.WHITE);
 		g.drawLine(hudX, 0, hudX, altoMapa);
 
@@ -350,25 +338,25 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		int margemX = hudX + 20;
 		int espacamento = 45; // Espaço entre as linhas
 
-		// 1. Vidas Restantes
+		// Vidas Restantes
 		int vidas = (jogador != null) ? jogador.getVida() : 0;
 		g.setColor(Color.WHITE);
 		g.drawString("VIDAS: " + vidas, margemX, margemY);
 		margemY += espacamento;
 
-		// 2. Pontuação
+		// Pontuação
 		g.drawString("PONTOS: " + config.getPontuacao(), margemX, margemY);
 		margemY += espacamento;
 
-		// 3. Fase Atual
+		// Fase Atual
 		g.drawString("FASE: " + config.getFase(), margemX, margemY);
 		margemY += espacamento;
 
-		// 4. Inimigos Restantes
+		// Inimigos Restantes
 		g.drawString("INIMIGOS: " + inimigosRestantes, margemX, margemY);
 		margemY += espacamento;
 
-		// 5. Tempo Restante
+		// Tempo Restante
 		long tempoAtual = System.currentTimeMillis() - inicioFase;
 		tempoRestanteMs = Math.max(0, tempoFaseMs - tempoAtual);
 		int segundosRestantes = (int) (tempoRestanteMs / 1000);
@@ -383,9 +371,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		g.drawString("TEMPO: " + segundosRestantes + "s", margemX, margemY);
 		margemY += espacamento;
 
-		// =========================================================
-		// 6. Power-up Ativo (ATUALIZADO)
-		// =========================================================
+		// Power-up Ativo (ATUALIZADO)
 		g.setColor(Color.WHITE);
 		g.drawString("POWER-UP:", margemX, margemY);
 
@@ -399,9 +385,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		// Escreve o nome do power-up que o jogador pegou por último
 		g.drawString(powerUpAtivoTexto, margemX, margemY + 25);
 
-		// =========================================================
 		// AVISOS DE STATUS NO MEIO DA TELA (Pausado, Game Over)
-		// =========================================================
 		if (pausado) {
 			g.setColor(Color.YELLOW);
 			g.setFont(new Font("Arial", Font.BOLD, 36));
@@ -448,12 +432,10 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 	}
 
 	private void atualizarTiros() {
-		// Trocamos o Iterator por um for aprimorado, que funciona perfeitamente com CopyOnWriteArrayList
 		for (Tiro t : tiros) {
 
 			boolean remover = false;
 
-			// Fora dos limites
 			if (!t.isAtivo() || t.getX() < -t.getLargura() || t.getY() < -t.getAltura() ||
 					t.getX() > largoMapa + 20 || t.getY() > altoMapa + 20) {
 				remover = true;
@@ -562,7 +544,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			}
 		}
 
-		// ... (O resto do seu código de congelar inimigos continua igualzinho aqui pra baixo) ...
 		if (inimigosCongelados) {
 			tempoInimigosCongelados--;
 			if (tempoInimigosCongelados <= 0) {
@@ -574,12 +555,10 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		}
 	}
 
-	// Método que você chama quando o tanque pega o power-up da Pá
 	private void ativarPowerUpPa() {
-		// Transforma os blocos ao redor da base em Aço (Mapa.ACO que vale 4)
 		alterarProtecaoDaBase(mundo.Mapa.ACO);
 
-		// Cria um timer de 15 segundos (15000 milissegundos) para reverter o efeito
+		// Cria um timer de 15 segundos para reverter o efeito
 		javax.swing.Timer timerPa = new javax.swing.Timer(15000, e -> {
 			// Volta os blocos para Tijolo (Mapa.TIJOLO que vale 3)
 			alterarProtecaoDaBase(mundo.Mapa.TIJOLO);
@@ -590,18 +569,11 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		timerPa.start();
 	}
 
-	// Método que vai no mapa e troca a matriz física
 	private void alterarProtecaoDaBase(int tipoBloco) {
-		// 1. Puxamos a matriz de inteiros de dentro do seu objeto mapa
 		int[][] matriz = mapa.getMatriz();
 
-		// 2. Coordenadas da Base. No seu mapa 13x13 (LINHAS=13, COLUNAS=13),
-		// a base clássica fica na última linha (12) e na coluna central (6).
-		// Se a sua base estiver em outro lugar, é só mudar esses dois números!
 		int linhaAguia = 12;
 		int colunaAguia = 6;
-
-		// 3. Alteramos os blocos em volta (formato de "U" invertido protegendo a águia)
 
 		// Esquerda
 		if (colunaAguia - 1 >= 0) {
@@ -667,8 +639,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			tentativas++;
 		}
 
-		// Se não encontrou posição vazia após 50 tentativas, gera na última posição vazia encontrada
-		// (fallback para garantir que o power-up sempre apareça)
 		for (int linha = 0; linha < Mapa.LINHAS; linha++) {
 			for (int col = 0; col < Mapa.COLUNAS; col++) {
 				if (mapaAtual[linha][col] == Mapa.VAZIO) {
@@ -698,10 +668,9 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 				enemy.tomarDano(999); // Dano massivo para matar
 				config.adicionarPontos(100); // Bônus por cada inimigo destruído
 
-				inimigosRestantes--; // <--- ESTA É A LINHA MÁGICA QUE FALTAVA!
+				inimigosRestantes--;
 			}
 		}
-		// Os inimigos mortos serão removidos na próxima iteração de atualizarInimigos()
 	}
 
 	private void aplicarPowerUp(PowerUp.TipoPowerUp tipo) {
@@ -732,9 +701,6 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 					enemy.congelar(600);
 				}
 
-				// SE VOCÊ TAMBÉM QUER QUE O RELÓGIO ADICIONE TEMPO NA FASE, DESCOMENTE A LINHA ABAIXO:
-				// this.tempoFase += 30; // Troque "tempoFase" pelo nome real da sua variável de tempo
-
 				config.adicionarPontos(50);
 				powerUpAtivoTexto = "RELÓGIO (GELO)";
 				break;
@@ -742,7 +708,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			case PA:
 				// Protege a base
 				jogador.aplicarPowerUp(tipo); // Pode manter se o jogador também ganha algo
-				ativarPowerUpPa(); // CHAMA O MÉTODO QUE PROTEGE A BASE!
+				ativarPowerUpPa();
 				config.adicionarPontos(50);
 				powerUpAtivoTexto = "PÁ (BASE BLINDADA)";
 				break;
@@ -756,20 +722,20 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 	}
 
 	private void verificarEstadoJogo() {
-		// 1. BASE foi destruída (gameOver ativado nos tiros)
+		// BASE foi destruída (gameOver ativado nos tiros)
 		if (gameOver) {
 			acionarGameOverMenu();
 			return;
 		}
 
-		// 2. Tempo da fase acabou
+		// Tempo da fase acabou
 		long tempoAtual = System.currentTimeMillis() - inicioFase;
 		if (tempoAtual >= tempoFaseMs) {
 			acionarGameOverMenu();
 			return;
 		}
 
-		// 3. Jogador tomou tiro
+		// Jogador tomou tiro
 		if (!jogador.estaVivo()) {
 			config.decrementarVida();
 
@@ -787,7 +753,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			}
 		}
 
-		// 4. Fase completa (matou todos os inimigos)
+		// Fase completa (matou todos os inimigos)
 		if (inimigosRestantes == 0 && !faseCompleta) {
 			faseCompleta = true;
 			proximaFase();
@@ -805,9 +771,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			mapaAtual[i] = mapaOriginal[i].clone();
 		}
 
-		// ==================================================
-		// NOVIDADE: RESETAR A POSIÇÃO DO JOGADOR
-		// ==================================================
+		//RESETAR A POSIÇÃO DO JOGADOR
 		if (jogador != null) {
 			// Calcula a posição inicial (Coluna 4, Linha 11 - padrão do seu mapa)
 			int startX = (4 * Mapa.TAMANHO) + (Mapa.TAMANHO - jogador.getLargura()) / 2;
@@ -817,11 +781,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			jogador.setX(startX);
 			jogador.setY(startY);
 
-			// Se você adicionou aquele método "resetarPosicao" no Passo 1 anterior,
-			// você pode usá-lo aqui no lugar dos setX e setY para garantir que ele vire pra CIMA:
-			// jogador.resetarPosicao(startX, startY);
 		}
-		// ==================================================
 
 		// Aumentar dificuldade (30% mais tanques)
 		spawnInimigos();
@@ -832,32 +792,31 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 		inicioFase = System.currentTimeMillis();
 		inicializarTempoFase();
 	}
+
 	public void finalizarJogo() {
 		timer.stop();
 
-		// Avisa as Threads para morrerem
 		if (jogador != null) jogador.parar();
 		for (TanqueInimigo enemy : inimigos) enemy.parar();
 		for (Tiro t : tiros) t.parar();
 
-		// Agora sim a trava vai funcionar direitinho!
 		if (!gameOverProcessado) {
 			gameOverProcessado = true;
 
-			Ranking ranking = new Ranking();
+			Ranking rankingPersistente = new Ranking();
+			rankingPersistente.carregar();
+			rankingPersistente.adicionarJogador(config.getNomeJogador(), config.getPontuacao(), config.getFase());
 
-			// PEGANDO OS DADOS REAIS DO JOGADOR
-			int pontosFinais = config.getPontuacao();
-			int faseFinal = config.getFase();
+			System.out.println("DEBUG: Ranking salvo. Chamando callback de Game Over...");
 
-			// Salva no arquivo (Depois você pode trocar "Jogador 1" por um nome digitado)
-			ranking.adicionarJogador("Jogador 1", pontosFinais, faseFinal);
+			if (gameOverCallback != null) {
+				gameOverCallback.onGameOver();
+			}
 
-			repaint(); // Garante que a tela vai atualizar
+			repaint();
 		}
 	}
 
-	//GERENCIA A TRANSIÇÃO PARA A TELA DE GAME OVER
 	private void acionarGameOverMenu() {
 		if (gameOverProcessado) return;
 		gameOverProcessado = true;
@@ -956,7 +915,7 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 	 * Reseta completamente a fase atual, recriando mapa, inimigos e jogador.
 	 */
 	public void reiniciarFaseAtual() {
-		// 1. Limpa os bloqueios de fim de jogo e pausa
+		// Limpa os bloqueios de fim de jogo e pausa
 		this.gameOver = false;
 		this.faseCompleta = false;
 		this.pausado = false;
@@ -967,19 +926,19 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			config.setVidas(3);
 		}
 
-		// 2. Limpa todos os itens e tiros da tela
+		// Limpa todos os itens e tiros da tela
 		this.tiros.clear();
 		this.powerUps.clear();
 		this.inimigosCongelados = false;
 
-		// 3. Reconstrói os blocos quebráveis do mapa
+		// Reconstrói os blocos quebráveis do mapa
 		Mapa mapaBase = selecionarMapa();
 		int[][] mapaOriginal = mapaBase.getMatriz();
 		for (int i = 0; i < mapaOriginal.length; i++) {
 			this.mapaAtual[i] = mapaOriginal[i].clone();
 		}
 
-		// 4. Reposiciona o tanque do jogador na base
+		// Reposiciona o tanque do jogador na base
 		if (jogador != null) {
 			int tamanhoTanque = Mapa.TAMANHO * 3 / 4;
 			int startX = (4 * Mapa.TAMANHO) + (Mapa.TAMANHO - tamanhoTanque) / 2;
@@ -991,13 +950,13 @@ public class PainelJogoV2 extends JPanel implements ActionListener {
 			// jogador.removerPowerUps();
 		}
 
-		// 5. Recria os inimigos nas posições iniciais
+		// Recria os inimigos nas posições iniciais
 		spawnInimigos();
 
-		// 6. Zera o cronômetro da fase para começar de novo
+		// Zera o cronômetro da fase para começar de novo
 		inicializarTempoFase();
 
-		// 7. Religa o motor do jogo
+		// Religa o motor do jogo
 		if (!timer.isRunning()) {
 			timer.start();
 		}
